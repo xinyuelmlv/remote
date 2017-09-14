@@ -1,0 +1,86 @@
+/**
+ * MAPLE CONFIDENTIAL - Highly Restricted: Do not distribute without prior approval
+ *
+ * Project: MAPLE
+ *
+ * Copyright © 2017 MAPLE Corporation. All rights reserved.
+ */
+package com.maple.earnings.controller;
+
+import java.util.List;
+
+import javax.servlet.http.HttpServletRequest;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import com.maple.earnings.common.pojo.EasyUIDataGridResult;
+import com.maple.earnings.pojo.EOrder;
+import com.maple.earnings.service.OrderService;
+import com.maple.earnings.service.TradeService;
+
+/**
+ * TODO - High level description about type's responsibility.
+ *
+ * @author Yayun
+ */
+@Controller
+@RequestMapping("/trade")
+public class TradeController {
+
+	@Autowired
+	private TradeService tradeService;
+
+	@Autowired
+	private OrderService orderService;
+
+	@RequestMapping("/list")
+	@ResponseBody
+	public EasyUIDataGridResult getTradeList(String userId,String timeType,String startTime,String endTime, Integer page, Integer rows) {
+		EasyUIDataGridResult result = this.tradeService.listByPage(userId,timeType,startTime,endTime, page, rows);
+		return result;
+	}
+	@RequestMapping("/tradeDetail")
+	@ResponseBody
+	public EasyUIDataGridResult getTradeDetail(String userId,long tid) {
+		EasyUIDataGridResult result = this.tradeService.getTradeDetail(userId,tid);
+		return result;
+	}
+
+	@RequestMapping("/order")
+	@ResponseBody
+	public EasyUIDataGridResult getOrderList(long tid, Integer page, Integer rows) {
+		EasyUIDataGridResult result = this.orderService.list(tid, page, rows);
+		return result;
+	}
+
+	@RequestMapping("/orderList")
+	@ResponseBody
+	public List<EOrder> getOrders(long tid) {
+		List<EOrder> result = this.orderService.list(tid);
+		return result;
+	}
+
+	@RequestMapping("/update")
+	@ResponseBody
+	public int addProductCost(HttpServletRequest request) {
+		int result = 0;
+		Long id = Long.parseLong(request.getParameter("id"));
+		Long tid = Long.parseLong(request.getParameter("tid"));
+		Double cost = Double.parseDouble(request.getParameter("cost"));
+		EOrder oderexp = new EOrder();
+		oderexp.setCost(cost);
+		oderexp.setId(id);
+		oderexp.setTid(tid);
+		try {
+			this.orderService.updateByKey(oderexp);
+			result = 1;
+		} catch (Exception ex) {
+			ex.printStackTrace();
+		}
+		return result;
+	}
+
+}

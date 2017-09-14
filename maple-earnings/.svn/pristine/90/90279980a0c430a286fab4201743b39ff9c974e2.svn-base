@@ -1,0 +1,27 @@
+<%@ page language="java" pageEncoding="UTF-8"%>
+<%@ include file="/commons/global.jsp"%>
+<!DOCTYPE HTML>
+<html dir="ltr" lang="en-US">
+	<head>
+	<script type="text/javascript" src="common/jquery-1.11.0.min.js"></script>
+	
+	<script type="text/javascript">
+	    // TODU 此处上线后需要改为域名或者主机IP
+		function jianquan()
+		{
+		// Tomcat启动		window.location.href="https://oauth.tbsandbox.com/authorize?response_type=code&client_id=1024484863&redirect_uri=local.fengling.com:8080/maple-earnings-web/AuthCheck/callback&state=1212&view=web";
+
+		  window.location.href="https://oauth.tbsandbox.com/authorize?response_type=code&client_id=1024484863&redirect_uri=local.fengling.com:8080/AuthCheck/callback&state=1212&view=web";
+		}
+		function houtaiguanli()
+		{
+		// TODU 上线后需要修改IP
+		  window.location.href="http://local.fengling.com:8080/AuthCheck/userManager";
+		}
+	</script>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<title>淘宝对账系统</title>	
+	<input type="button" onclick="jianquan()" value="用户授权接入"></input>
+	<input type="button" onclick="houtaiguanli()" value="后台管理"></input>
+	</head>
+</html>

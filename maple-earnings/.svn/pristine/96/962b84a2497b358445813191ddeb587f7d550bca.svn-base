@@ -1,0 +1,394 @@
+package com.maple.earnings.controller;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import com.maple.earnings.common.pojo.EasyUIDataGridResult;
+import com.maple.earnings.pojo.EOrder;
+import com.maple.earnings.pojo.EProduct;
+import com.maple.earnings.pojo.ETrade;
+import com.maple.earnings.pojo.EUser;
+import com.maple.earnings.pojo.ManagerUser;
+import com.maple.earnings.pojo.ProductInfoBean;
+import com.maple.earnings.pojo.TradeInfoBean;
+import com.maple.earnings.pojo.TradeInfoBean.OrdersBean.OrderBean;
+import com.maple.earnings.service.ManagerUserService;
+import com.maple.earnings.service.OrderService;
+import com.maple.earnings.service.ProductService;
+import com.maple.earnings.service.TradeService;
+import com.maple.earnings.service.UserService;
+import com.taobao.api.ApiException;
+import com.taobao.api.DefaultTaobaoClient;
+import com.taobao.api.TaobaoClient;
+import com.taobao.api.request.FenxiaoProductsGetRequest;
+import com.taobao.api.request.TradesSoldGetRequest;
+import com.taobao.api.response.FenxiaoProductsGetResponse;
+import com.taobao.api.response.TradesSoldGetResponse;
+import com.taobao.api.internal.util.StringUtils;
+
+import net.sf.json.JSON;
+import net.sf.json.JSONArray;
+import net.sf.json.JSONObject;
+
+@Controller
+@RequestMapping("/AuthCheck")
+public class AuthCheckController {
+	@Autowired
+	private UserService userService;
+	@Autowired
+	private TradeService tradeService;
+	@Autowired
+	private OrderService orderService;
+	@Autowired
+	private ProductService productService;
+	@Autowired
+	private ManagerUserService managerUserService;
+	// 定义全局静态变量
+	public static String APPKEY = "1024484863";
+	public static String APPSECRET = "sandbox566cc6b2d5b6d0b6bdddfe714";
+	public static String BASEURL = "http://gw.api.tbsandbox.com/router/rest";
+
+	@RequestMapping("/callback")
+	protected void callBack(HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, IOException {
+		String code = request.getParameter("code");
+		// tomcat启动：
+		// response.sendRedirect("http://local.fengling.com:8080/maple-earnings-web/AuthCheck/check?code="
+		// + code);
+		response.sendRedirect("http://local.fengling.com:8080/AuthCheck/check?code=" + code);
+	}
+
+	// 修改管理员信息
+	@RequestMapping("/updateAdmin")
+	@ResponseBody
+	protected int updateAdmin(HttpServletRequest request) throws ServletException, IOException {
+		int result = 0;
+		ManagerUser managerUser = new ManagerUser();
+		try{
+			String role = request.getParameter("role");
+			String status = request.getParameter("status");
+			String userId = request.getParameter("userId");
+			managerUser.setRole(Integer.parseInt(role));
+			managerUser.setStatus(Integer.parseInt(status));
+			managerUser.setUserid(userId);
+			this.managerUserService.Update(managerUser);
+			result = 1;
+			
+		}catch(Exception ex){
+			System.out.println(ex);
+		}
+		
+		return result;
+	}
+	// 修改管理员信息
+		@RequestMapping("/addAdmin")
+		@ResponseBody
+		protected int addAdmin(HttpServletRequest request) throws ServletException, IOException {
+			int result = 0;
+			ManagerUser managerUser = new ManagerUser();
+			try{
+				String password=request.getParameter("password");
+				String userName=request.getParameter("userName");
+				String role = request.getParameter("role");
+				String status = request.getParameter("status");
+				managerUser.setPassword(password);
+				managerUser.setRole(Integer.parseInt(role));
+				managerUser.setStatus(Integer.parseInt(status));
+				managerUser.setUsername(userName);
+				managerUser.setIntime(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()));
+				managerUser.setUserid(UUID.randomUUID().toString().substring(1, 8));
+				this.managerUserService.save(managerUser);
+				result = 1;
+			}catch(Exception ex){
+		       System.out.println(ex);
+			}
+			
+			return result;
+		}
+	@RequestMapping("/listUser")
+	@ResponseBody
+	protected EasyUIDataGridResult listUser(int page, int rows) throws ServletException, IOException {
+		EasyUIDataGridResult result = this.userService.list(page, rows);
+		return result;
+	}
+	@RequestMapping("/checkUser")
+	@ResponseBody
+	protected int checkUser(String userName,String password,int role) throws ServletException, IOException {
+		// 1.超级管理员  2.禁止登录  3.普通管理员
+	    int result= this.managerUserService.login(userName, password, role);
+		return result;
+	}
+	@RequestMapping("/listAdmin")
+	@ResponseBody
+	protected EasyUIDataGridResult listAdmin(int page, int rows) throws ServletException, IOException {
+		EasyUIDataGridResult result = this.managerUserService.list(page, rows);
+		return result;
+	}
+
+	@RequestMapping("/userManager")
+	protected String userManager() throws ServletException, IOException {
+		return "userManager";
+	}
+
+	@RequestMapping("/adminLogin")
+	protected String adminLogin() throws ServletException, IOException {
+		return "adminLogin";
+	}
+
+	// 超级管理员
+	@RequestMapping("/superAdmin")
+	protected String adminList() throws ServletException, IOException {
+		return "superAdmin";
+	}
+
+	@SuppressWarnings("unchecked")
+	@RequestMapping("/check")
+	protected String doPost(HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, IOException, ApiException {
+		String redirectResult="";
+		String code = request.getParameter("code");
+		request.setCharacterEncoding("UTF-8");
+		response.setCharacterEncoding("UTF-8");
+		response.setContentType("text/html;charset=UTF-8");
+		String userInfo = "";
+		if (code != null) {
+			String url = "https://oauth.tbsandbox.com/token";
+			Map<String, String> props = new HashMap<String, String>();
+			props.put("grant_type", "authorization_code");
+			props.put("code", code);
+			// props.put("client_id", "23589066");
+			// props.put("client_secret", "7149d4c8dcb5da3d5cd7382889ffd645");
+			// 沙箱环境
+			props.put("client_id", APPKEY);
+			props.put("client_secret", APPSECRET);
+			// tomcat 启动 props.put("redirect_uri",
+			// "local.fengling.com:8080/maple-earnings-web/AuthCheck/CheckOk");
+			props.put("redirect_uri", "local.fengling.com:8080/AuthCheck/CheckOk");
+			props.put("view", "web");
+			userInfo = AuthCheckController.sendPost(url, props);
+			System.out.println(userInfo);
+			// 拿到accessToken,存储用户信息
+			JSONObject jsonObjectUserInfo = JSONObject.fromObject(userInfo);
+			EUser user = new EUser();
+			user.setAccess_token(jsonObjectUserInfo.getString("access_token"));
+			// user.setExpire_time(jsonObjectUserInfo.getLong("expire_time"));
+			// user.setExpires_in(jsonObjectUserInfo.getInt("expires_in"));
+			// user.setR1_expires_in(jsonObjectUserInfo.getInt("r1_expires_in"));
+			// user.setR1_valid(jsonObjectUserInfo.getLong("r1_valid"));
+			// user.setR2_expires_in(jsonObjectUserInfo.getInt("r2_expires_in"));
+			// user.setR2_valid(jsonObjectUserInfo.getLong("r2_valid"));
+			// user.setRe_expires_in(jsonObjectUserInfo.getInt("re_expires_in"));
+			// user.setRefresh_token(jsonObjectUserInfo.getString("refresh_token"));
+			// user.setRefresh_token_valid_time(jsonObjectUserInfo.getLong("refresh_token_valid_time"));
+			user.setTaobao_user_id(jsonObjectUserInfo.getString("taobao_user_id"));
+			user.setTaobao_user_nick(jsonObjectUserInfo.getString("taobao_user_nick"));
+			user.setRegisterTime(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()));
+			user.setStatus(1);
+			// user.setToken_type(jsonObjectUserInfo.getString("token_type"));
+			// user.setW1_expires_in(jsonObjectUserInfo.getInt("w1_expires_in"));
+			// user.setW1_valid(jsonObjectUserInfo.getInt("w1_valid"));
+			// user.setW2_expires_in(jsonObjectUserInfo.getInt("w2_expires_in"));
+			// user.setW2_valid(jsonObjectUserInfo.getLong("w2_valid"));
+			HttpSession session = request.getSession();
+			session.setAttribute("userId", jsonObjectUserInfo.getString("taobao_user_id"));
+			EUser user1 = userService.load(jsonObjectUserInfo.getString("taobao_user_id"));
+			
+			if (user1 == null) {
+				userService.register(user);
+				// 抓取商品信息
+				TaobaoClient clientProduct = new DefaultTaobaoClient(BASEURL, APPKEY, APPSECRET);
+				FenxiaoProductsGetRequest reqProduct = new FenxiaoProductsGetRequest();
+				FenxiaoProductsGetResponse rspProduct = clientProduct.execute(reqProduct,
+						jsonObjectUserInfo.getString("access_token"));
+				System.out.println(rspProduct.getBody());
+				try {
+					String productData = rspProduct.getBody();
+					JSONObject jsonObjectProduct = JSONObject.fromObject(productData);
+					String productResponseData = jsonObjectProduct.getString("fenxiao_products_get_response");
+					JSONObject jsonObjectResData = JSONObject.fromObject(productResponseData);
+					String products = jsonObjectResData.getString("products");
+					JSONObject jsonObjectProducts = JSONObject.fromObject(products);
+					String productInfo = jsonObjectProducts.getString("fenxiao_product");
+					JSONArray jsonArray = JSONArray.fromObject(productInfo);
+					List<ProductInfoBean> lProductInfoBean = new ArrayList<>();
+					lProductInfoBean = JSONArray.toList(jsonArray, ProductInfoBean.class);
+					for (ProductInfoBean productInfoBean : lProductInfoBean) {
+						EProduct eproduct = new EProduct();
+						eproduct.setNumIid(productInfoBean.getPid());
+						eproduct.setNum(productInfoBean.getQuantity());
+						eproduct.setTitle(productInfoBean.getName());
+						eproduct.setApprroveStatus(productInfoBean.getStatus());
+						eproduct.setPrice(Double.parseDouble(productInfoBean.getStandard_price()));
+						eproduct.setuId(jsonObjectUserInfo.getString("taobao_user_id"));
+						productService.add(eproduct);
+					}
+				} catch (Exception ex) {
+					System.out.println("抓取商品信息失败！");
+
+				}
+				// 抓取订单信息
+				TaobaoClient client = new DefaultTaobaoClient(BASEURL, APPKEY, APPSECRET);
+				TradesSoldGetRequest req = new TradesSoldGetRequest();
+				req.setFields("tid,type,status,payment,orders,rx_audit_status");
+				req.setStartCreated(StringUtils.parseDateTime("2017-01-01 00:00:00"));
+				req.setEndCreated(StringUtils.parseDateTime("2017-6-11 23:59:59"));
+				TradesSoldGetResponse rsp = client.execute(req, jsonObjectUserInfo.getString("access_token"));
+				System.out.println(rsp.getBody());
+				String tradesData = rsp.getBody();
+				JSONObject jsonObjectTrade = JSONObject.fromObject(tradesData);
+				String tradesSoldGetResponseData = null;
+				try {
+					tradesSoldGetResponseData = jsonObjectTrade.getString("trades_sold_get_response");
+				} catch (Exception ex) {
+					System.out.println("调取接口失败");
+				}
+				JSONObject jsonObjectResData = JSONObject.fromObject(tradesSoldGetResponseData);
+				String trades = null;
+				try {
+					trades = jsonObjectResData.getString("trades");
+					JSONObject jsonObjectTrades = JSONObject.fromObject(trades);
+					String tradeInfo = jsonObjectTrades.getString("trade");
+					JSONArray jsonArray = JSONArray.fromObject(tradeInfo);
+					List<TradeInfoBean> lTradeInfoBeans = new ArrayList<>();
+					lTradeInfoBeans = JSONArray.toList(jsonArray, TradeInfoBean.class);
+					for (TradeInfoBean tradeInfoBean : lTradeInfoBeans) {
+						System.out.println(tradeInfoBean.getPayment());
+						ETrade etrade = new ETrade();
+						etrade.setTid(tradeInfoBean.getTid());
+						etrade.setTotalFee(Double.parseDouble(tradeInfoBean.getPayment()));
+						etrade.setStatus(tradeInfoBean.getStatus());
+						etrade.setUserId(user.getTaobao_user_id());
+						tradeService.saveOrUpdate(etrade);
+						JSONArray jsArrayOrder = JSONArray.fromObject(tradeInfoBean.getOrders().getOrder());
+						@SuppressWarnings("deprecation")
+						List<TradeInfoBean.OrdersBean.OrderBean> lorderBean = JSONArray.toList(jsArrayOrder,
+								TradeInfoBean.OrdersBean.OrderBean.class);
+						for (OrderBean orderBean : lorderBean) {
+							EOrder eorder = new EOrder();
+							// eorder.setCost(orderBean.get);
+							// eorder.seteRefund(eRefund);
+							// eorder.setId(id);
+							eorder.setNum(orderBean.getNum());
+							// ------------------------------------------------------
+							// eorder.setNumIid(orderBean.getNum_iid());
+							// -----------------------------------------------------
+							eorder.setPrice(Double.parseDouble(orderBean.getPrice()));
+							// eorder.setRefundId(); 未付值
+							eorder.setRefundStatus(orderBean.getRefund_status());
+							eorder.setStatus(orderBean.getStatus());
+							eorder.setTid(tradeInfoBean.getTid());
+							eorder.setTitle(orderBean.getTitle());
+							eorder.setId(orderBean.getOid());
+
+							EOrder eorder1 = new EOrder();
+							eorder1 = orderService.listById(eorder.getId());
+							if (eorder1 == null) {
+								orderService.add(tradeInfoBean.getTid(), eorder, null);
+							}
+						}
+
+					}
+				} catch (Exception e) {
+					System.out.println("账户下无订单！");
+				}
+				redirectResult="login";
+			}
+			else{
+				int status=user1.getStatus();
+				if(status==3){
+					redirectResult="runout";
+				}
+			}
+
+		}
+		return redirectResult;
+	}
+
+	@RequestMapping("/CheckOk")
+	@ResponseBody
+	protected void login(HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, IOException {
+
+	}
+
+	public static String sendPost(String url, Map<String, String> parameters) {
+		String result = "";// 返回的结果
+		BufferedReader in = null;// 读取响应输入流
+		PrintWriter out = null;
+		StringBuffer sb = new StringBuffer();// 处理请求参数
+		String params = "";// 编码之后的参数
+		try {
+			// 编码请求参数
+			if (parameters.size() == 1) {
+				for (String name : parameters.keySet()) {
+					sb.append(name).append("=").append(java.net.URLEncoder.encode(parameters.get(name), "UTF-8"));
+				}
+				params = sb.toString();
+			} else {
+				for (String name : parameters.keySet()) {
+					sb.append(name).append("=").append(java.net.URLEncoder.encode(parameters.get(name), "UTF-8"))
+							.append("&");
+				}
+				String temp_params = sb.toString();
+				params = temp_params.substring(0, temp_params.length() - 1);
+			}
+			// 创建URL对象
+			java.net.URL connURL = new java.net.URL(url);
+			// 打开URL连接
+			java.net.HttpURLConnection httpConn = (java.net.HttpURLConnection) connURL.openConnection();
+			// 设置通用属性
+			httpConn.setRequestProperty("Accept", "*/*");
+			httpConn.setRequestProperty("Connection", "Keep-Alive");
+			httpConn.setRequestProperty("User-Agent", "Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 6.1)");
+			// 设置POST方式
+			httpConn.setDoInput(true);
+			httpConn.setDoOutput(true);
+			// 获取HttpURLConnection对象对应的输出流
+			out = new PrintWriter(httpConn.getOutputStream());
+			// 发送请求参数
+			out.write(params);
+			// flush输出流的缓冲
+			out.flush();
+			// 定义BufferedReader输入流来读取URL的响应，设置编码方式
+			in = new BufferedReader(new InputStreamReader(httpConn.getInputStream(), "UTF-8"));
+			String line;
+			// 读取返回的内容
+			while ((line = in.readLine()) != null) {
+				result += line;
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			try {
+				if (out != null) {
+					out.close();
+				}
+				if (in != null) {
+					in.close();
+				}
+			} catch (IOException ex) {
+				ex.printStackTrace();
+			}
+		}
+		return result;
+	}
+
+}

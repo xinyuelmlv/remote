@@ -1,0 +1,266 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.maple.earnings.mapper.EProductMapper" >
+  <resultMap id="BaseResultMap" type="com.maple.earnings.pojo.EProduct" >
+    <id column="num_iid" property="numIid" jdbcType="BIGINT" />
+    <result column="apprrove_status" property="apprroveStatus" jdbcType="VARCHAR" />
+    <result column="modified" property="modified" jdbcType="VARCHAR" />
+    <result column="num" property="num" jdbcType="INTEGER" />
+    <result column="price" property="price" jdbcType="DOUBLE" />
+    <result column="title" property="title" jdbcType="VARCHAR" />
+    <result column="taobao_user_id" property="uId" jdbcType="VARCHAR" />
+     
+       <association property="eProductCost" javaType="com.maple.earnings.pojo.EProductCost">
+          <id column="id" property="id" jdbcType="BIGINT" />
+          <result column="begin_date" property="beginDate" jdbcType="TIMESTAMP" />
+          <result column="cost" property="cost" jdbcType="DOUBLE" />
+          <result column="end_date" property="endDate" jdbcType="TIMESTAMP" />
+          <result column="num_iid" property="numIid" jdbcType="BIGINT" />           
+        </association>
+  </resultMap>
+  <sql id="Example_Where_Clause" >
+    <where >
+      <foreach collection="oredCriteria" item="criteria" separator="or" >
+        <if test="criteria.valid" >
+          <trim prefix="(" suffix=")" prefixOverrides="and" >
+            <foreach collection="criteria.criteria" item="criterion" >
+              <choose >
+                <when test="criterion.noValue" >
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue" >
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue" >
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue" >
+                  and ${criterion.condition}
+                  <foreach collection="criterion.value" item="listItem" open="(" close=")" separator="," >
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Update_By_Example_Where_Clause" >
+    <where >
+      <foreach collection="example.oredCriteria" item="criteria" separator="or" >
+        <if test="criteria.valid" >
+          <trim prefix="(" suffix=")" prefixOverrides="and" >
+            <foreach collection="criteria.criteria" item="criterion" >
+              <choose >
+                <when test="criterion.noValue" >
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue" >
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue" >
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue" >
+                  and ${criterion.condition}
+                  <foreach collection="criterion.value" item="listItem" open="(" close=")" separator="," >
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Base_Column_List" >
+    num_iid, apprrove_status, modified, num, price, title, taobao_user_id
+  </sql>
+  <select id="selectByExample" resultMap="BaseResultMap" parameterType="com.maple.earnings.pojo.EProductExample" >
+    select
+    <if test="distinct" >
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    from e_product
+    <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null" >
+      order by ${orderByClause}
+    </if>
+  </select>
+  <select id="selectProAndCostByExample" resultMap="BaseResultMap" parameterType="com.maple.earnings.pojo.EProductExample" >
+    select
+    <if test="distinct" >
+      distinct
+    </if>
+    ep.num_iid, ep.apprrove_status, ep.modified, ep.num, 
+    ep.price, ep.title, ep.taobao_user_id,cos.num_iid,cos.cost  from e_product ep left JOIN e_product_cost cos
+    ON ep.num_iid=cos.num_iid
+    <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null" >
+      order by ${orderByClause}
+    </if>
+  </select>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long" >
+    select 
+    <include refid="Base_Column_List" />
+    from e_product
+    where num_iid = #{numIid,jdbcType=BIGINT}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long" >
+    delete from e_product
+    where num_iid = #{numIid,jdbcType=BIGINT}
+  </delete>
+  <delete id="deleteByExample" parameterType="com.maple.earnings.pojo.EProductExample" >
+    delete from e_product
+    <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+  </delete>
+  <insert id="insert" parameterType="com.maple.earnings.pojo.EProduct" >
+    insert into e_product (num_iid, apprrove_status, modified, 
+      num, price, title, taobao_user_id
+      )
+    values (#{numIid,jdbcType=BIGINT}, #{apprroveStatus,jdbcType=VARCHAR}, #{modified,jdbcType=VARCHAR}, 
+      #{num,jdbcType=INTEGER}, #{price,jdbcType=DOUBLE}, #{title,jdbcType=VARCHAR}, #{uId,jdbcType=VARCHAR}
+      )
+  </insert>
+  <insert id="insertSelective" parameterType="com.maple.earnings.pojo.EProduct" >
+    insert into e_product
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="numIid != null" >
+        num_iid,
+      </if>
+      <if test="apprroveStatus != null" >
+        apprrove_status,
+      </if>
+      <if test="modified != null" >
+        modified,
+      </if>
+      <if test="num != null" >
+        num,
+      </if>
+      <if test="price != null" >
+        price,
+      </if>
+      <if test="title != null" >
+        title,
+      </if>
+      <if test="uId != null" >
+        taobao_user_id,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="numIid != null" >
+        #{numIid,jdbcType=BIGINT},
+      </if>
+      <if test="apprroveStatus != null" >
+        #{apprroveStatus,jdbcType=VARCHAR},
+      </if>
+      <if test="modified != null" >
+        #{modified,jdbcType=VARCHAR},
+      </if>
+      <if test="num != null" >
+        #{num,jdbcType=INTEGER},
+      </if>
+      <if test="price != null" >
+        #{price,jdbcType=DOUBLE},
+      </if>
+      <if test="title != null" >
+        #{title,jdbcType=VARCHAR},
+      </if>
+      <if test="uId != null" >
+        #{uId,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <select id="countByExample" parameterType="com.maple.earnings.pojo.EProductExample" resultType="java.lang.Integer" >
+    select count(*) from e_product
+    <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+  </select>
+  <update id="updateByExampleSelective" parameterType="map" >
+    update e_product
+    <set >
+      <if test="record.numIid != null" >
+        num_iid = #{record.numIid,jdbcType=BIGINT},
+      </if>
+      <if test="record.apprroveStatus != null" >
+        apprrove_status = #{record.apprroveStatus,jdbcType=VARCHAR},
+      </if>
+      <if test="record.modified != null" >
+        modified = #{record.modified,jdbcType=VARCHAR},
+      </if>
+      <if test="record.num != null" >
+        num = #{record.num,jdbcType=INTEGER},
+      </if>
+      <if test="record.price != null" >
+        price = #{record.price,jdbcType=DOUBLE},
+      </if>
+      <if test="record.title != null" >
+        title = #{record.title,jdbcType=VARCHAR},
+      </if>
+      <if test="record.uId != null" >
+        taobao_user_id = #{record.uId,jdbcType=VARCHAR},
+      </if>
+    </set>
+    <if test="_parameter != null" >
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByExample" parameterType="map" >
+    update e_product
+    set num_iid = #{record.numIid,jdbcType=BIGINT},
+      apprrove_status = #{record.apprroveStatus,jdbcType=VARCHAR},
+      modified = #{record.modified,jdbcType=VARCHAR},
+      num = #{record.num,jdbcType=INTEGER},
+      price = #{record.price,jdbcType=DOUBLE},
+      title = #{record.title,jdbcType=VARCHAR},
+      taobao_user_id = #{record.uId,jdbcType=VARCHAR}
+    <if test="_parameter != null" >
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByPrimaryKeySelective" parameterType="com.maple.earnings.pojo.EProduct" >
+    update e_product
+    <set >
+      <if test="apprroveStatus != null" >
+        apprrove_status = #{apprroveStatus,jdbcType=VARCHAR},
+      </if>
+      <if test="modified != null" >
+        modified = #{modified,jdbcType=VARCHAR},
+      </if>
+      <if test="num != null" >
+        num = #{num,jdbcType=INTEGER},
+      </if>
+      <if test="price != null" >
+        price = #{price,jdbcType=DOUBLE},
+      </if>
+      <if test="title != null" >
+        title = #{title,jdbcType=VARCHAR},
+      </if>
+      <if test="uId != null" >
+        taobao_user_id = #{uId,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where num_iid = #{numIid,jdbcType=BIGINT}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.maple.earnings.pojo.EProduct" >
+    update e_product
+    set apprrove_status = #{apprroveStatus,jdbcType=VARCHAR},
+      modified = #{modified,jdbcType=VARCHAR},
+      num = #{num,jdbcType=INTEGER},
+      price = #{price,jdbcType=DOUBLE},
+      title = #{title,jdbcType=VARCHAR},
+      taobao_user_id = #{uId,jdbcType=VARCHAR}
+    where num_iid = #{numIid,jdbcType=BIGINT}
+  </update>
+</mapper>

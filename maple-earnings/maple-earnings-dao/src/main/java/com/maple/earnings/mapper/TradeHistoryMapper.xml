@@ -1,0 +1,237 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.maple.earnings.mapper.TradeHistoryMapper" >
+  <resultMap id="BaseResultMap" type="com.maple.earnings.pojo.TradeHistory" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="tid" property="tid" jdbcType="BIGINT" />
+    <result column="changeTime" property="changetime" jdbcType="VARCHAR" />
+    <result column="realPayment" property="realpayment" jdbcType="DOUBLE" />
+    <result column="postFee" property="postfee" jdbcType="DOUBLE" />
+    <result column="shuoldPayment" property="shuoldpayment" jdbcType="DOUBLE" />
+  </resultMap>
+    <resultMap id="StringMap" type="string" >
+  </resultMap>
+  <sql id="Example_Where_Clause" >
+    <where >
+      <foreach collection="oredCriteria" item="criteria" separator="or" >
+        <if test="criteria.valid" >
+          <trim prefix="(" suffix=")" prefixOverrides="and" >
+            <foreach collection="criteria.criteria" item="criterion" >
+              <choose >
+                <when test="criterion.noValue" >
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue" >
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue" >
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue" >
+                  and ${criterion.condition}
+                  <foreach collection="criterion.value" item="listItem" open="(" close=")" separator="," >
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Update_By_Example_Where_Clause" >
+    <where >
+      <foreach collection="example.oredCriteria" item="criteria" separator="or" >
+        <if test="criteria.valid" >
+          <trim prefix="(" suffix=")" prefixOverrides="and" >
+            <foreach collection="criteria.criteria" item="criterion" >
+              <choose >
+                <when test="criterion.noValue" >
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue" >
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue" >
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue" >
+                  and ${criterion.condition}
+                  <foreach collection="criterion.value" item="listItem" open="(" close=")" separator="," >
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Base_Column_List" >
+    id, tid, changeTime, realPayment, postFee, shuoldPayment,title,status
+  </sql>
+  <select id="selectByExample" resultMap="BaseResultMap" parameterType="com.maple.earnings.pojo.TradeHistoryExample" >
+    select
+     tid, changeTime, realPayment, postFee, shuoldPayment,title,status,COUNT(tid) as id
+    from trade_history_${userId}
+    <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+    GROUP BY tid
+    <if test="orderByClause != null" >
+      order by ${orderByClause}
+    </if>
+  </select>
+    <select id="selectByTid" resultMap="BaseResultMap" parameterType="map" >
+    select
+    changeTime, realPayment, postFee, shuoldPayment,title,status
+    from trade_history_${userId}  where tid = #{tid,jdbcType=VARCHAR}
+  </select>
+    <select id="selectMaxRealPay" resultMap="StringMap" parameterType="map" >
+    select MAX(realPayment) as realPayment
+    from trade_history_${userId}  where tid = #{tid,jdbcType=VARCHAR}
+  </select>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select 
+    <include refid="Base_Column_List" />
+    from trade_history
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
+    delete from trade_history
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  <delete id="deleteByExample" parameterType="com.maple.earnings.pojo.TradeHistoryExample" >
+    delete from trade_history
+    <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+  </delete>
+  <insert id="insert" parameterType="com.maple.earnings.pojo.TradeHistory" >
+    insert into trade_history_${userId} (tid, changeTime, 
+      realPayment, postFee, shuoldPayment,title,status
+      )
+    values (#{tid,jdbcType=BIGINT}, #{changetime,jdbcType=VARCHAR}, 
+      #{realpayment,jdbcType=DOUBLE}, #{postfee,jdbcType=DOUBLE}, #{shuoldpayment,jdbcType=DOUBLE}, #{title,jdbcType=VARCHAR},#{status,jdbcType=VARCHAR}
+      )
+  </insert>
+  <insert id="insertSelective" parameterType="com.maple.earnings.pojo.TradeHistory" >
+    insert into trade_history
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="tid != null" >
+        tid,
+      </if>
+      <if test="changetime != null" >
+        changeTime,
+      </if>
+      <if test="realpayment != null" >
+        realPayment,
+      </if>
+      <if test="postfee != null" >
+        postFee,
+      </if>
+      <if test="shuoldpayment != null" >
+        shuoldPayment,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=INTEGER},
+      </if>
+      <if test="tid != null" >
+        #{tid,jdbcType=BIGINT},
+      </if>
+      <if test="changetime != null" >
+        #{changetime,jdbcType=VARCHAR},
+      </if>
+      <if test="realpayment != null" >
+        #{realpayment,jdbcType=DOUBLE},
+      </if>
+      <if test="postfee != null" >
+        #{postfee,jdbcType=DOUBLE},
+      </if>
+      <if test="shuoldpayment != null" >
+        #{shuoldpayment,jdbcType=DOUBLE},
+      </if>
+    </trim>
+  </insert>
+  <select id="countByExample" parameterType="com.maple.earnings.pojo.TradeHistoryExample" resultType="java.lang.Integer" >
+    select count(*) from trade_history
+    <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+  </select>
+  <update id="updateByExampleSelective" parameterType="map" >
+    update trade_history
+    <set >
+      <if test="record.id != null" >
+        id = #{record.id,jdbcType=INTEGER},
+      </if>
+      <if test="record.tid != null" >
+        tid = #{record.tid,jdbcType=BIGINT},
+      </if>
+      <if test="record.changetime != null" >
+        changeTime = #{record.changetime,jdbcType=VARCHAR},
+      </if>
+      <if test="record.realpayment != null" >
+        realPayment = #{record.realpayment,jdbcType=DOUBLE},
+      </if>
+      <if test="record.postfee != null" >
+        postFee = #{record.postfee,jdbcType=DOUBLE},
+      </if>
+      <if test="record.shuoldpayment != null" >
+        shuoldPayment = #{record.shuoldpayment,jdbcType=DOUBLE},
+      </if>
+    </set>
+    <if test="_parameter != null" >
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByExample" parameterType="map" >
+    update trade_history
+    set id = #{record.id,jdbcType=INTEGER},
+      tid = #{record.tid,jdbcType=BIGINT},
+      changeTime = #{record.changetime,jdbcType=VARCHAR},
+      realPayment = #{record.realpayment,jdbcType=DOUBLE},
+      postFee = #{record.postfee,jdbcType=DOUBLE},
+      shuoldPayment = #{record.shuoldpayment,jdbcType=DOUBLE}
+    <if test="_parameter != null" >
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByPrimaryKeySelective" parameterType="com.maple.earnings.pojo.TradeHistory" >
+    update trade_history
+    <set >
+      <if test="tid != null" >
+        tid = #{tid,jdbcType=BIGINT},
+      </if>
+      <if test="changetime != null" >
+        changeTime = #{changetime,jdbcType=VARCHAR},
+      </if>
+      <if test="realpayment != null" >
+        realPayment = #{realpayment,jdbcType=DOUBLE},
+      </if>
+      <if test="postfee != null" >
+        postFee = #{postfee,jdbcType=DOUBLE},
+      </if>
+      <if test="shuoldpayment != null" >
+        shuoldPayment = #{shuoldpayment,jdbcType=DOUBLE},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.maple.earnings.pojo.TradeHistory" >
+    update trade_history
+    set tid = #{tid,jdbcType=BIGINT},
+      changeTime = #{changetime,jdbcType=VARCHAR},
+      realPayment = #{realpayment,jdbcType=DOUBLE},
+      postFee = #{postfee,jdbcType=DOUBLE},
+      shuoldPayment = #{shuoldpayment,jdbcType=DOUBLE}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+</mapper>

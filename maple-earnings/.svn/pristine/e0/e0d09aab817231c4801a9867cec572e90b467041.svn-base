@@ -1,0 +1,230 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+	pageEncoding="UTF-8"%>
+<%@ include file="/commons/global.jsp"%>
+
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="X-UA-Compatible" content="edge" />
+<title>超级管理员</title>
+<style type="text/css">
+#fm {
+	margin: 0;
+	padding: 10px 30px;
+}
+
+.ftitle {
+	font-size: 14px;
+	font-weight: bold;
+	padding: 5px 0;
+	margin-bottom: 10px;
+	border-bottom: 1px solid #ccc;
+}
+
+.fitem {
+	margin-bottom: 5px;
+}
+
+.fitem label {
+	display: inline-block;
+	width: 80px;
+}
+</style>
+<script type="text/javascript">
+
+function formatRoleShow(value,row,index){
+if(value==1){
+        return "普通管理员";
+    }
+    else{
+        return "超级管理员";
+}
+}
+function formatStatusShow(value,row,index){
+	if(value==1){
+	        return "正常";
+	    }
+	    else{
+	        return "禁止登录";
+	}
+	}
+	// 编辑用户
+	var url;
+	var type;
+	function edituser() {
+		var row = $("#dataGrid").datagrid("getSelected");
+		if (row) {
+			$("#dlg").dialog("open").dialog('setTitle', '');
+			$('#userId').val(row.userid);
+			$('#userName').val(row.username);
+		} else {
+			$.messager.alert("提示信息", "请先选中要操作的行！");
+		}
+	}
+	// 添加用户
+	function adduser() {
+			$("#adddlg").dialog("open").dialog('setTitle', '');
+	}
+	// 保存编辑用户 
+	function saveuser() {
+		var role = $("#role").datebox("getValue");
+		var status=$("#status").datebox("getValue");
+		$("#fm").form("submit", {
+			url : '${path }' + '/AuthCheck/updateAdmin?role='+role+'&status='+status+'&userId='+$('#userId').val(),
+			success : function(result) {
+				if (result == 1) {
+					$.messager.alert("提示信息", "操作成功");
+					$("#dlg").dialog("close");
+					$("#dataGrid").datagrid("load");
+				} else {
+					$.messager.alert("提示信息", "操作失败");
+				}
+			}
+		});
+	}
+	//退出
+	 function logout(){
+        $.messager.confirm('提示','确定要退出?',function(r){
+            if (r){
+                progressLoad();
+                        window.location.href='http://local.fengling.com:8080';
+                        progressClose();
+            }
+        });
+    }
+	// 保存新建用户 
+	function saveadduser() {
+		var role = $("#role").datebox("getValue");
+		var status=$("#status").datebox("getValue");
+		var userName=$('#username').val();
+		$("#fm").form("submit", {
+			url : '${path }' + '/AuthCheck/addAdmin?role='+role+'&status='+status+'&userId='+$('#userId').val()+'&password='+$('#password').val()+'&userName='+userName,
+			success : function(result) {
+				if (result == 1) {
+					$.messager.alert("提示信息", "操作成功");
+					$("#adddlg").dialog("close");
+					$("#dataGrid").datagrid("load");
+				} else {
+					$.messager.alert("提示信息", "操作失败");
+				}
+			}
+		});
+	}
+</script>
+</head>
+<body class="easyui-layout" data-options="fit:true,border:false">
+	<div data-options="region:'center',fit:true,border:false">
+		<div id="tb" style="padding: 3px">
+			<span>用户名:</span> <input name="StartTime" id="StartTime"
+				class="easyui-datetimebox" type="text" /> <span>接入时间:</span> <input
+				name="StartTime" id="StartTime" class="easyui-datetimebox"
+				type="text" /> <span>当前状态:</span> <select class="easyui-combobox"
+				name="orderStatus" id="orderStatus" style="width: 200px;">
+				<option value="all">所有</option>
+			</select> <a href="#" class="easyui-linkbutton" plain="true"
+				onclick="doSearch()" iconcls="icon-search">查询</a> <a
+				href="javascript:void(0)" class="easyui-linkbutton"
+				iconcls="icon-edit" onclick="edituser()" plain="true">修改</a> <a
+				href="javascript:void(0)" class="easyui-linkbutton"
+				iconcls="icon-add" onclick="adduser()" plain="true">添加</a>
+				<a
+					href="javascript:void(0)" onclick="logout()"
+					class="easyui-linkbutton" plain="true" icon="icon-clear">安全退出</a>
+		</div>
+		<table class="easyui-datagrid" id="dataGrid" title="用户管理"
+			data-options="
+       singleSelect:true,
+       collapsible:true,  
+       rownumbers : true,
+       pagination:true,
+       url:'${path}/AuthCheck/listAdmin',
+       method:'get',
+       pageSize:10,
+        queryParams: {},
+      ">
+			<thead>
+				<tr>
+					<th data-options="field:'userid',width:'20%'">用户ID</th>
+					<th data-options="field:'username',width:'20%'">用户名</th>
+					<th data-options="field:'intime',width:'20%'">接入时间</th>
+					<th data-options="field:'status',width:'20%'"
+						formatter="formatStatusShow">当前状态</th>
+					<th data-options="field:'role',width:'10%'"
+						formatter="formatRoleShow">角色</th>
+				</tr>
+			</thead>
+		</table>
+	</div>
+	<div id="dlg" class="easyui-dialog"
+		style="width: 400px; height: 280px; padding: 10px 20px;" closed="true"
+		buttons="#dlg-buttons">
+		<div class="ftitle">修改管理员信息</div>
+		<form id="fm" method="post">
+			<div class="fitem">
+				<label>编号</label> <input name="userId" id="userId"
+					class="easyui-validatebox" readonly="readonly" />
+			</div>
+			<div class="fitem">
+				<label>用户名</label> <input name="userName" id="userName"
+					class="easyui-validatebox" readonly="readonly" />
+			</div>
+			<div class="fitem">
+				<label>状态</label> <select class="easyui-combobox" name="status"
+					id="status" style="width: 200px;">
+					<option value="1">正常</option>
+					<option value="2">禁止登录</option>
+				</select>
+			</div>
+			<div class="fitem">
+				<label>角色</label> <select class="easyui-combobox" name="role"
+					id="role" style="width: 200px;">
+					<option value="1">普通管理员</option>
+					<option value="2">超级管理员</option>
+				</select>
+			</div>
+		</form>
+	</div>
+	<div id="dlg-buttons">
+		<a href="javascript:void(0)" class="easyui-linkbutton"
+			onclick="saveuser()" iconcls="icon-save">保存</a> <a
+			href="javascript:void(0)" class="easyui-linkbutton"
+			onclick="javascript:$('#dlg').dialog('close')" iconcls="icon-cancel">取消</a>
+	</div>
+	<div id="adddlg" class="easyui-dialog"
+		style="width: 400px; height: 280px; padding: 10px 20px;" closed="true"
+		buttons="#dlg-buttons">
+		<div class="ftitle">添加管理员信息</div>
+		<form id="fm" method="post">
+			<div class="fitem">
+				<label>用户名</label> <input name="username" id="username"
+					class="easyui-validatebox" />
+			</div>
+			<div class="fitem">
+				<label>初始密码</label> <input name="password" id="password"
+					class="easyui-validatebox" />
+			</div>
+			<div class="fitem">
+				<label>状态</label> <select class="easyui-combobox" name="status"
+					id="status" style="width: 200px;">
+					<option value="1">正常</option>
+					<option value="2">禁止登录</option>
+				</select>
+			</div>
+			<div class="fitem">
+				<label>角色</label> <select class="easyui-combobox" name="role"
+					id="role" style="width: 200px;">
+					<option value="1">普通管理员</option>
+					<option value="2">超级管理员</option>
+				</select>
+			</div>
+		</form>
+	</div>
+	<div id="dlg-buttons">
+		<a href="javascript:void(0)" class="easyui-linkbutton"
+			onclick="saveadduser()" iconcls="icon-save">保存</a> <a
+			href="javascript:void(0)" class="easyui-linkbutton"
+			onclick="javascript:$('#dlg').dialog('close')" iconcls="icon-cancel">取消</a>
+	</div>
+	<div id="toolbar" style="display: none;"></div>
+</body>
+</html>

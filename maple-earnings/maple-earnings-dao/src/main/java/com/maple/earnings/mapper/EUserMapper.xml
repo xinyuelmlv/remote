@@ -1,0 +1,264 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.maple.earnings.mapper.EUserMapper" >
+  <resultMap id="BaseResultMap" type="com.maple.earnings.pojo.EUser" >
+    <id column="taobao_user_id" property="taobao_user_id" jdbcType="VARCHAR" />
+    <result column="taobao_user_nick" property="taobao_user_nick" jdbcType="VARCHAR" />
+    <result column="register_time" property="registerTime" jdbcType="VARCHAR" />
+    <result column="status" property="status" jdbcType="INTEGER" />
+  </resultMap>
+  <sql id="Example_Where_Clause" >
+    <where >
+      <foreach collection="oredCriteria" item="criteria" separator="or" >
+        <if test="criteria.valid" >
+          <trim prefix="(" suffix=")" prefixOverrides="and" >
+            <foreach collection="criteria.criteria" item="criterion" >
+              <choose >
+                <when test="criterion.noValue" >
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue" >
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue" >
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue" >
+                  and ${criterion.condition}
+                  <foreach collection="criterion.value" item="listItem" open="(" close=")" separator="," >
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Update_By_Example_Where_Clause" >
+    <where >
+      <foreach collection="example.oredCriteria" item="criteria" separator="or" >
+        <if test="criteria.valid" >
+          <trim prefix="(" suffix=")" prefixOverrides="and" >
+            <foreach collection="criteria.criteria" item="criterion" >
+              <choose >
+                <when test="criterion.noValue" >
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue" >
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue" >
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue" >
+                  and ${criterion.condition}
+                  <foreach collection="criterion.value" item="listItem" open="(" close=")" separator="," >
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Base_Column_List" >
+    taobao_user_id, taobao_user_nick,register_time,expire_time,status,access_token,connectorName,email,tel,companyName,nashui,kaihui,addr
+  </sql>
+  <select id="selectByExample" resultMap="BaseResultMap" parameterType="com.maple.earnings.pojo.EUserExample" >
+    select
+    <if test="distinct" >
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    from e_user
+    <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null" >
+      order by ${orderByClause}
+    </if>
+  </select>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select 
+    <include refid="Base_Column_List" />
+    from e_user
+    where taobao_user_id = #{taobao_user_id,jdbcType=VARCHAR}
+  </select>
+   <select id="selectByUserName" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select 
+    <include refid="Base_Column_List" />
+    from e_user
+    where taobao_user_nick = #{taobao_user_nick,jdbcType=VARCHAR}
+  </select>
+  <select id="createOrder" parameterType="java.lang.String" >
+  CREATE TABLE e_order_${userId} (
+  `id` bigint(100) NOT NULL AUTO_INCREMENT,
+  `cost` decimal(10,2) NOT NULL,
+  `num` int(11) NOT NULL,
+  `price` decimal(10,2) NOT NULL,
+  `refund_status` varchar(255) DEFAULT NULL,
+  `status` varchar(255) DEFAULT NULL,
+  `title` varchar(255) DEFAULT NULL,
+  `num_iid` bigint(20) NOT NULL,
+  `tid` bigint(20) DEFAULT NULL,
+  `refund_id` bigint(20) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `FK49vkqj4watuenfvhajepmgd8v` (`tid`)
+) ENGINE=InnoDB AUTO_INCREMENT=1000019761062551085 DEFAULT CHARSET=utf8
+  </select>
+    <select id="createTrade" parameterType="java.lang.String" >
+  CREATE TABLE e_trade_${userId} (
+  `tid` bigint(100) NOT NULL,
+  `created` varchar(255) DEFAULT NULL,
+  `end_time` varchar(255) DEFAULT NULL,
+  `modified_time` varchar(255) DEFAULT NULL,
+  `pay_time` varchar(255) DEFAULT NULL,
+  `status` varchar(255) DEFAULT NULL,
+  `total_fee` decimal(50,2) DEFAULT NULL,
+  `taobao_user_id` varchar(80) DEFAULT NULL,
+  `received_payment` decimal(50,2) DEFAULT NULL,
+  PRIMARY KEY (`tid`),
+  KEY `FKkyjxif23sivvtmm5d06k9y29v` (`taobao_user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8
+  </select>
+      <select id="createOrderReport" parameterType="java.lang.String" >
+ CREATE TABLE order_report_${userId} (
+  `tid` bigint(20) NOT NULL,
+  `product_cost` decimal(6,2) DEFAULT NULL,
+  `extra_cost` decimal(6,2) DEFAULT NULL,
+  `total_fee` decimal(6,2) DEFAULT NULL,
+  `refund_fee` decimal(6,2) DEFAULT NULL,
+  `gain` decimal(6,2) DEFAULT NULL,
+  `commission` decimal(6,2) DEFAULT NULL,
+  `real_receive` decimal(6,2) DEFAULT NULL,
+  `report_date` varchar(255) DEFAULT NULL,
+  `status` varchar(255) DEFAULT NULL,
+  `taobao_user_id` varchar(80) DEFAULT NULL,
+  PRIMARY KEY (`tid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+  </select>
+  <select id="createTradeHistory" parameterType="java.lang.String" >
+ CREATE TABLE trade_history_${userId} (
+`id` int(20) NOT NULL AUTO_INCREMENT,
+  `tid` bigint(30) DEFAULT NULL,
+  `changeTime` varchar(40) DEFAULT NULL,
+  `realPayment` double(40,0) DEFAULT NULL,
+  `postFee` double(40,0) DEFAULT NULL,
+  `shuoldPayment` double(40,0) DEFAULT NULL,
+  `title` varchar(100) DEFAULT NULL,
+  `status` varchar(100) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8;
+
+
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long" >
+    delete from e_user
+    where taobao_user_id = #{taobao_user_id,jdbcType=VARCHAR}
+  </delete>
+  <delete id="deleteByExample" parameterType="com.maple.earnings.pojo.EUserExample" >
+    delete from e_user
+    <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+  </delete>
+  <insert id="insert" parameterType="com.maple.earnings.pojo.EUser" >
+    insert into e_user (taobao_user_id, taobao_user_nick,register_time,status,refresh_token,access_token,expire_time)
+    values (#{taobao_user_id,jdbcType=VARCHAR}, #{taobao_user_nick,jdbcType=VARCHAR},#{registerTime,jdbcType=VARCHAR},#{status,jdbcType=INTEGER} ,#{refresh_token,jdbcType=VARCHAR}, #{access_token,jdbcType=VARCHAR},#{expire_time,jdbcType=BIGINT})
+  </insert>
+  <insert id="insertSelective" parameterType="com.maple.earnings.pojo.EUser" >
+    insert into e_user
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="taobao_user_id != null" >
+        taobao_user_id,
+      </if>
+      <if test="taobao_user_nick != null" >
+        taobao_user_nick,
+      </if>
+      <if test="status != null" >
+        status,
+      </if>
+       <if test="registerTime!= null" >
+        register_time
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="taobao_user_id != null" >
+        #{taobao_user_id,jdbcType=VARCHAR},
+      </if>
+      <if test="taobao_user_nick != null" >
+        #{taobao_user_nick,jdbcType=VARCHAR},
+      </if>
+      <if test="status != null" >
+        #{status,jdbcType=INTEGER},
+      </if>
+       <if test="registerTime!= null" >
+          #{register_time,jdbcType=VARCHAR}
+      </if>
+    </trim>
+  </insert>
+  <select id="countByExample" parameterType="com.maple.earnings.pojo.EUserExample" resultType="java.lang.Integer" >
+    select count(*) from e_user
+    <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+  </select>
+  <update id="updateByExampleSelective" parameterType="map" >
+    update e_user
+    <set >
+      <if test="record.taobao_user_id != null" >
+        taobao_user_id = #{record.taobao_user_id,jdbcType=VARCHAR},
+      </if>
+      <if test="record.taobao_user_nick != null" >
+        taobao_user_nick = #{record.taobao_user_nick,jdbcType=VARCHAR},
+      </if>
+    </set>
+    <if test="_parameter != null" >
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByExample" parameterType="map" >
+    update e_user
+    set taobao_user_id = #{record.taobao_user_id,jdbcType=VARCHAR},
+      taobao_user_nick = #{record.taobao_user_nick,jdbcType=VARCHAR}
+    <if test="_parameter != null" >
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByPrimaryKeySelective" parameterType="com.maple.earnings.pojo.EUser" >
+    update e_user
+    <set >
+      <if test="taobao_user_nick != null" >
+        taobao_user_nick = #{taobao_user_nick,jdbcType=VARCHAR},
+      </if>
+        <if test="expire_time != null" >
+        expire_time = #{expire_time,jdbcType=BIGINT}
+      </if>
+    </set>
+    where taobao_user_id = #{taobao_user_id,jdbcType=VARCHAR}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.maple.earnings.pojo.EUser" >
+    update e_user
+    set access_token = #{access_token,jdbcType=VARCHAR},
+    refresh_token = #{refresh_token,jdbcType=VARCHAR}
+    where taobao_user_id = #{taobao_user_id,jdbcType=VARCHAR}
+  </update>
+   <update id="updateExpreTime" parameterType="java.lang.Long" >
+    update e_user
+    set expire_time = #{expire_time,jdbcType=BIGINT}
+  </update>
+    <update id="updateUserInfo" parameterType="com.maple.earnings.pojo.EUser" >
+    update e_user set connectorName=#{connectorName,jdbcType=VARCHAR},
+    email=#{email,jdbcType=VARCHAR},
+    tel=#{tel,jdbcType=VARCHAR},
+    companyName=#{companyName,jdbcType=VARCHAR},
+    nashui=#{nashui,jdbcType=VARCHAR},
+    kaihui=#{kaihui,jdbcType=VARCHAR},
+    addr=#{addr,jdbcType=VARCHAR}
+    where taobao_user_id = #{taobao_user_id,jdbcType=VARCHAR}
+  </update>
+</mapper>

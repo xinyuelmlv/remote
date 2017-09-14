@@ -1,0 +1,11 @@
+com\maple\earnings\mapper\WuliuMapper.class
+com\maple\earnings\mapper\TradeHistoryMapper.class
+com\maple\earnings\mapper\EOrderMapper.class
+com\maple\earnings\mapper\EUserMapper.class
+com\maple\earnings\mapper\ManagerUserMapper.class
+com\maple\earnings\mapper\ETradeMapper.class
+com\maple\earnings\mapper\OrderReportMapper.class
+com\maple\earnings\mapper\ERefundMapper.class
+com\maple\earnings\mapper\EProductCostMapper.class
+com\maple\earnings\mapper\ETradeMiddleMapper.class
+com\maple\earnings\mapper\EProductMapper.class

@@ -1,0 +1,321 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.maple.earnings.mapper.OrderReportMapper" >
+  <resultMap id="BaseResultMap" type="com.maple.earnings.pojo.OrderReport" >
+     <id column="tid" property="tid" jdbcType="BIGINT" /> 
+    <result column="product_cost" property="productCost" jdbcType="DECIMAL" />
+    <result column="extra_cost" property="extraCost" jdbcType="DECIMAL" />
+    <result column="total_fee" property="totalFee" jdbcType="DECIMAL" />
+    <result column="refund_fee" property="refundFee" jdbcType="DECIMAL" />
+    <result column="gain" property="gain" jdbcType="DECIMAL" />
+    <result column="commission" property="commission" jdbcType="DECIMAL" />
+    <result column="real_receive" property="realReceive" jdbcType="DECIMAL" />
+    <result column="report_date" property="reportDate" jdbcType="VARCHAR" />
+    <result column="status" property="status" jdbcType="VARCHAR" />
+    <result column="taobao_user_id" property="userId" jdbcType="VARCHAR" />
+  </resultMap>
+   <resultMap id="DayReportResultMap" type="com.maple.earnings.pojo.DayReport" >
+    <result column="product_cost" property="productCost" jdbcType="DOUBLE" />
+    <result column="extra_cost" property="orderCost" jdbcType="DOUBLE" />
+    <result column="total_fee" property="payment" jdbcType="DOUBLE" />
+    <result column="gain" property="earnings" jdbcType="DOUBLE" />
+    <result column="commission" property="commission" jdbcType="DOUBLE" />
+    <result column="report_date" property="date" jdbcType="VARCHAR" />
+    <result column="taobao_user_id" property="userId" jdbcType="VARCHAR" />
+  </resultMap>
+  <sql id="Example_Where_Clause" >
+    <where >
+      <foreach collection="oredCriteria" item="criteria" separator="or" >
+        <if test="criteria.valid" >
+          <trim prefix="(" suffix=")" prefixOverrides="and" >
+            <foreach collection="criteria.criteria" item="criterion" >
+              <choose >
+                <when test="criterion.noValue" >
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue" >
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue" >
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue" >
+                  and ${criterion.condition}
+                  <foreach collection="criterion.value" item="listItem" open="(" close=")" separator="," >
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Update_By_Example_Where_Clause" >
+    <where >
+      <foreach collection="example.oredCriteria" item="criteria" separator="or" >
+        <if test="criteria.valid" >
+          <trim prefix="(" suffix=")" prefixOverrides="and" >
+            <foreach collection="criteria.criteria" item="criterion" >
+              <choose >
+                <when test="criterion.noValue" >
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue" >
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue" >
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue" >
+                  and ${criterion.condition}
+                  <foreach collection="criterion.value" item="listItem" open="(" close=")" separator="," >
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Base_Column_List" >
+    tid, product_cost, extra_cost, total_fee,refund_fee, gain, commission, real_receive, report_date, status,
+    taobao_user_id
+  </sql>
+  <select id="selectByExample" resultMap="BaseResultMap" parameterType="com.maple.earnings.pojo.OrderReportExample" >
+    select
+    <if test="distinct" >
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    from order_report_${userId}
+    <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null" >
+      order by ${orderByClause}
+    </if>
+  </select>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="map" >
+    select 
+    <include refid="Base_Column_List" />
+    from order_report_${userId}
+    where tid = #{tid,jdbcType=BIGINT}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long" >
+    delete from order_report
+    where tid = #{tid,jdbcType=BIGINT}
+  </delete>
+  <delete id="deleteByExample" parameterType="com.maple.earnings.pojo.OrderReportExample" >
+    delete from order_report
+    <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+  </delete>
+  <insert id="insert" parameterType="com.maple.earnings.pojo.OrderReport" >
+    insert into order_report_${userId} (tid, product_cost, extra_cost, 
+      total_fee, refund_fee,gain, commission, 
+      real_receive, report_date,status,taobao_user_id
+      )
+    values (#{tid,jdbcType=BIGINT}, #{productCost,jdbcType=DECIMAL}, #{extraCost,jdbcType=DECIMAL}, 
+      #{totalFee,jdbcType=DECIMAL}, #{refundFee,jdbcType=DECIMAL}, #{gain,jdbcType=DECIMAL}, #{commission,jdbcType=DECIMAL}, 
+      #{realReceive,jdbcType=DECIMAL}, #{reportDate,jdbcType=VARCHAR},#{status,jdbcType=VARCHAR}, #{userId,jdbcType=VARCHAR}
+      )
+  </insert>
+  <insert id="insertSelective" parameterType="com.maple.earnings.pojo.OrderReport" >
+    insert into order_report
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="tid != null" >
+        tid,
+      </if>
+      <if test="productCost != null" >
+        product_cost,
+      </if>
+      <if test="extraCost != null" >
+        extra_cost,
+      </if>
+      <if test="totalFee != null" >
+        total_fee,
+      </if>
+      <if test="refundFee != null" >
+        refund_fee,
+      </if>
+      <if test="gain != null" >
+        gain,
+      </if>
+      <if test="commission != null" >
+        commission,
+      </if>
+      <if test="realReceive != null" >
+        real_receive,
+      </if>
+      <if test="reportDate != null" >
+        report_date,
+      </if>
+      <if test="status != null" >
+        status,
+      </if>
+      <if test="userId != null" >
+        taobao_user_id,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="tid != null" >
+        #{tid,jdbcType=BIGINT},
+      </if>
+      <if test="productCost != null" >
+        #{productCost,jdbcType=DECIMAL},
+      </if>
+      <if test="extraCost != null" >
+        #{extraCost,jdbcType=DECIMAL},
+      </if>
+      <if test="totalFee != null" >
+        #{totalFee,jdbcType=DECIMAL},
+      </if>
+      <if test="refundFee != null" >
+        #{refundFee,jdbcType=DECIMAL},
+      </if>
+      <if test="gain != null" >
+        #{gain,jdbcType=DECIMAL},
+      </if>
+      <if test="commission != null" >
+        #{commission,jdbcType=DECIMAL},
+      </if>
+      <if test="realReceive != null" >
+        #{realReceive,jdbcType=DECIMAL},
+      </if>
+      <if test="reportDate != null" >
+        #{reportDate,jdbcType=VARCHAR},
+      </if>
+      <if test="userId != null" >
+        #{userId,jdbcType=VARCHAR},
+      </if>
+      <if test="status != null" >
+        #{status,jdbcType=BIGINT},
+      </if>
+    </trim>
+  </insert>
+  <select id="selectReportDates" parameterType="java.lang.String" resultType="java.lang.String">
+  	select report_date from order_report_${userId} where taobao_user_id = #{userId,jdbcType=VARCHAR} group by report_date 
+  </select>
+  <select id="selectDayReportDates" parameterType="java.lang.String"  resultMap="DayReportResultMap">
+  	SELECT SUM( product_cost) AS 'product_cost',SUM( extra_cost) AS 'extra_cost',count(taobao_user_id) AS 'taobao_user_id' ,SUM( total_fee) AS 'total_fee',SUM( gain) AS 'gain',SUM(commission) AS 'commission',report_date FROM order_report_${userId} WHERE taobao_user_id=#{userId,jdbcType=VARCHAR} group by report_date;
+  </select>
+  <select id="countByExample" parameterType="com.maple.earnings.pojo.OrderReportExample" resultType="java.lang.Integer" >
+    select count(*) from order_report
+    <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+  </select>
+  <update id="updateByExampleSelective" parameterType="map" >
+    update order_report
+    <set >
+      <if test="record.tid != null" >
+        tid = #{record.tid,jdbcType=BIGINT},
+      </if>
+      <if test="record.productCost != null" >
+        product_cost = #{record.productCost,jdbcType=DECIMAL},
+      </if>
+      <if test="record.extraCost != null" >
+        extra_cost = #{record.extraCost,jdbcType=DECIMAL},
+      </if>
+      <if test="record.totalFee != null" >
+        total_fee = #{record.totalFee,jdbcType=DECIMAL},
+      </if>
+      <if test="record.refundFee != null" >
+        refund_fee = #{record.refundFee,jdbcType=DECIMAL},
+      </if>
+      <if test="record.gain != null" >
+        gain = #{record.gain,jdbcType=DECIMAL},
+      </if>
+      <if test="record.commission != null" >
+        commission = #{record.commission,jdbcType=DECIMAL},
+      </if>
+      <if test="record.realReceive != null" >
+        real_receive = #{record.realReceive,jdbcType=DECIMAL},
+      </if>
+      <if test="record.reportDate != null" >
+        report_date = #{record.reportDate,jdbcType=VARCHAR},
+      </if>
+      <if test="record.status != null" >
+        report_date = #{record.status,jdbcType=VARCHAR},
+      </if>
+      <if test="record.userId != null" >
+        taobao_user_id = #{record.userId,jdbcType=VARCHAR},
+      </if>
+    </set>
+    <if test="_parameter != null" >
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByExample" parameterType="map" >
+    update order_report
+    set tid = #{record.tid,jdbcType=BIGINT},
+      product_cost = #{record.productCost,jdbcType=DECIMAL},
+      extra_cost = #{record.extraCost,jdbcType=DECIMAL},
+      total_fee = #{record.totalFee,jdbcType=DECIMAL},
+      refund_fee = #{record.refundFee,jdbcType=DECIMAL},
+      gain = #{record.gain,jdbcType=DECIMAL},
+      commission = #{record.commission,jdbcType=DECIMAL},
+      real_receive = #{record.realReceive,jdbcType=DECIMAL},
+      report_date = #{record.reportDate,jdbcType=VARCHAR},
+      status = #{record.status,jdbcType=VARCHAR},
+      taobao_user_id = #{record.userId,jdbcType=VARCHAR}
+    <if test="_parameter != null" >
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByPrimaryKeySelective" parameterType="com.maple.earnings.pojo.OrderReport" >
+    update order_report
+    <set >
+      <if test="productCost != null" >
+        product_cost = #{productCost,jdbcType=DECIMAL},
+      </if>
+      <if test="extraCost != null" >
+        extra_cost = #{extraCost,jdbcType=DECIMAL},
+      </if>
+      <if test="totalFee != null" >
+        total_fee = #{totalFee,jdbcType=DECIMAL},
+      </if>
+      <if test="refundFee != null" >
+        refund_fee = #{refundFee,jdbcType=DECIMAL},
+      </if>
+      <if test="gain != null" >
+        gain = #{gain,jdbcType=DECIMAL},
+      </if>
+      <if test="commission != null" >
+        commission = #{commission,jdbcType=DECIMAL},
+      </if>
+      <if test="realReceive != null" >
+        real_receive = #{realReceive,jdbcType=DECIMAL},
+      </if>
+      <if test="reportDate != null" >
+        report_date = #{reportDate,jdbcType=VARCHAR},
+      </if>
+      <if test="status != null" >
+        status = #{reportDate,jdbcType=VARCHAR},
+      </if>
+      <if test="userId != null" >
+        taobao_user_id = #{userId,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where tid = #{tid,jdbcType=BIGINT}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.maple.earnings.pojo.OrderReport" >
+    update order_report_${userId}
+    set product_cost = #{productCost,jdbcType=DECIMAL},
+      extra_cost = #{extraCost,jdbcType=DECIMAL},
+      total_fee = #{totalFee,jdbcType=DECIMAL},
+      refund_fee = #{refundFee,jdbcType=DECIMAL},
+      gain = #{gain,jdbcType=DECIMAL},
+      commission = #{commission,jdbcType=DECIMAL},
+      real_receive = #{realReceive,jdbcType=DECIMAL},
+      report_date = #{reportDate,jdbcType=VARCHAR},
+      status = #{status,jdbcType=VARCHAR},
+      taobao_user_id = #{userId,jdbcType=VARCHAR}
+    where tid = #{tid,jdbcType=BIGINT}
+  </update>
+</mapper>

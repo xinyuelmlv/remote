@@ -1,0 +1,80 @@
+/**
+ * MAPLE CONFIDENTIAL - Highly Restricted: Do not distribute without prior approval
+ *
+ * Project: MAPLE
+ *
+ * Copyright © 2017 MAPLE Corporation. All rights reserved.
+ */
+package com.maple.earnings.service.impl;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.maple.earnings.mapper.EUserMapper;
+import com.maple.earnings.pojo.EUser;
+import com.maple.earnings.pojo.EUserExample;
+import com.maple.earnings.service.UserService;
+
+/**
+ * TODO - High level description about type's responsibility.
+ *
+ * @author Yayun
+ */
+@Service
+public class UserServiceImpl implements UserService {
+
+	// ------- Constants (static final) ----------------------------------------
+
+	// ------- Static Variables (static) ---------------------------------------
+
+	// ------- Instance Variables (private) ------------------------------------
+	@Autowired
+	private EUserMapper userMapper;
+	// ------- Constructors ----------------------------------------------------
+
+	// ------- Instance Methods (public) ---------------------------------------
+	/**
+	 * {@inheritDoc}
+	 *
+	 * TODO - Add javadoc for the sub-type.
+	 */
+	@Override
+	public List<EUser> list() {
+		List<EUser> users = new ArrayList<>();
+		EUserExample example = new EUserExample();
+		users = this.userMapper.selectByExample(example);
+		return users;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * TODO - Add javadoc for the sub-type.
+	 */
+	@Override
+	public EUser load(String taobao_user_id) {
+		return this.userMapper.selectByPrimaryKey(taobao_user_id);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * TODO - Add javadoc for the sub-type.
+	 */
+	@Override
+	public void register(EUser user) {
+		this.userMapper.insert(user);
+	}
+
+	// ------- Instance Methods (protected) ------------------------------------
+
+	// ------- Instance Methods (private) --------------------------------------
+
+	// ------- Static Methods --------------------------------------------------
+
+	// ------- Optional Inner Class ------------------------------------------
+
+}

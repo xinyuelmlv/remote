@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beansProjectDescription>
+	<version>1</version>
+	<pluginVersion><![CDATA[3.7.2.201511260958-RELEASE]]></pluginVersion>
+	<configSuffixes>
+		<configSuffix><![CDATA[xml]]></configSuffix>
+	</configSuffixes>
+	<enableImports><![CDATA[false]]></enableImports>
+	<configs>
+	</configs>
+	<autoconfigs>
+		<config>src/test/resources/spring/springmvc.xml</config>
+		<config>src/test/resources/spring/applicationContext-trans.xml</config>
+		<config>src/test/resources/spring/applicationContext-dao.xml</config>
+		<config>src/test/resources/spring/applicationContext-service.xml</config>
+		<config>src/main/resources/spring/springmvc.xml</config>
+	</autoconfigs>
+	<configSets>
+	</configSets>
+</beansProjectDescription>

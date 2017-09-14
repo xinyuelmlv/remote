@@ -1,0 +1,26 @@
+/**
+ * MAPLE CONFIDENTIAL - Highly Restricted: Do not distribute without prior approval
+ *
+ * Project: MAPLE
+ *
+ * Copyright © 2017 MAPLE Corporation. All rights reserved.
+ */
+package com.maple.earnings.service;
+
+import java.util.List;
+
+import com.maple.earnings.pojo.EUser;
+
+/**
+ * TODO - High level description about type's responsibility.
+ *
+ * @author Yayun
+ */
+public interface UserService {
+
+	List<EUser> list();
+
+	EUser load(String taobao_user_id);
+
+	void register(EUser user);
+}

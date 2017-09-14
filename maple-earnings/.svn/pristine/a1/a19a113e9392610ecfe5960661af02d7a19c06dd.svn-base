@@ -1,0 +1,51 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+	pageEncoding="UTF-8"%>
+<%@ include file="/commons/global.jsp"%>
+
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="X-UA-Compatible" content="edge" />
+<title>用户管理</title>
+</head>
+<body class="easyui-layout" data-options="fit:true,border:false">
+	<div data-options="region:'center',fit:true,border:false">
+		<div id="tb" style="padding: 3px">
+			<span>用户名:</span> <input name="StartTime" id="StartTime"
+				class="easyui-datetimebox" type="text" />
+				<span>接入时间:</span> 
+				<input name="StartTime" id="StartTime"
+				class="easyui-datetimebox" type="text" />
+			<span>当前状态:</span> <select class="easyui-combobox" name="orderStatus"
+				id="orderStatus" style="width: 200px;">
+				<option value="all">所有</option>
+				<option value="WAIT_SELLER_SEND_GOODS">已付款</option>
+				<option value="WAIT_BUYER_CONFIRM_GOODS">已发货</option>
+				<option value="TRADE_FINISHED">已完成</option>
+			</select> <a href="#" class="easyui-linkbutton" plain="true"
+				onclick="doSearch()" iconcls="icon-search">查询</a> 
+		</div>
+		<table class="easyui-datagrid" id="dataGrid" title="用户管理"
+			data-options="
+       singleSelect:true,
+       collapsible:true,  
+       rownumbers : true,
+       pagination:true,
+       url:'${path}/AuthCheck/listUser',
+       method:'get',
+       pageSize:10,
+        queryParams: {},
+      ">
+			<thead>
+				<tr>
+					<th data-options="field:'taobao_user_id',width:'10%'">用户ID</th>
+					<th data-options="field:'taobao_user_nick',width:'10%'">用户名</th>
+					<th data-options="field:'registerTime',width:'10%'">接入时间</th>
+					<th data-options="field:'registerTime',width:'10%'">当前状态</th>
+				</tr>
+			</thead>
+		</table>
+	</div>
+	<div id="toolbar" style="display: none;"></div>
+</body>
+</html>

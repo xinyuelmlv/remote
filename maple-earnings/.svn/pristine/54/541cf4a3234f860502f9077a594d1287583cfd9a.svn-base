@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.maple.earnings.mapper.EUserMapper" >
+  <resultMap id="BaseResultMap" type="com.maple.earnings.pojo.EUser" >
+    <id column="taobao_user_id" property="taobao_user_id" jdbcType="VARCHAR" />
+    <result column="taobao_user_nick" property="taobao_user_nick" jdbcType="VARCHAR" />
+  </resultMap>
+  <sql id="Example_Where_Clause" >
+    <where >
+      <foreach collection="oredCriteria" item="criteria" separator="or" >
+        <if test="criteria.valid" >
+          <trim prefix="(" suffix=")" prefixOverrides="and" >
+            <foreach collection="criteria.criteria" item="criterion" >
+              <choose >
+                <when test="criterion.noValue" >
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue" >
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue" >
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue" >
+                  and ${criterion.condition}
+                  <foreach collection="criterion.value" item="listItem" open="(" close=")" separator="," >
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Update_By_Example_Where_Clause" >
+    <where >
+      <foreach collection="example.oredCriteria" item="criteria" separator="or" >
+        <if test="criteria.valid" >
+          <trim prefix="(" suffix=")" prefixOverrides="and" >
+            <foreach collection="criteria.criteria" item="criterion" >
+              <choose >
+                <when test="criterion.noValue" >
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue" >
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue" >
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue" >
+                  and ${criterion.condition}
+                  <foreach collection="criterion.value" item="listItem" open="(" close=")" separator="," >
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Base_Column_List" >
+    taobao_user_id, taobao_user_nick
+  </sql>
+  <select id="selectByExample" resultMap="BaseResultMap" parameterType="com.maple.earnings.pojo.EUserExample" >
+    select
+    <if test="distinct" >
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    from e_user
+    <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null" >
+      order by ${orderByClause}
+    </if>
+  </select>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select 
+    <include refid="Base_Column_List" />
+    from e_user
+    where taobao_user_id = #{taobao_user_id,jdbcType=VARCHAR}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long" >
+    delete from e_user
+    where taobao_user_id = #{taobao_user_id,jdbcType=VARCHAR}
+  </delete>
+  <delete id="deleteByExample" parameterType="com.maple.earnings.pojo.EUserExample" >
+    delete from e_user
+    <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+  </delete>
+  <insert id="insert" parameterType="com.maple.earnings.pojo.EUser" >
+    insert into e_user (taobao_user_id, taobao_user_nick)
+    values (#{taobao_user_id,jdbcType=VARCHAR}, #{taobao_user_nick,jdbcType=VARCHAR})
+  </insert>
+  <insert id="insertSelective" parameterType="com.maple.earnings.pojo.EUser" >
+    insert into e_user
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="taobao_user_id != null" >
+        taobao_user_id,
+      </if>
+      <if test="taobao_user_nick != null" >
+        taobao_user_nick,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="taobao_user_id != null" >
+        #{taobao_user_id,jdbcType=VARCHAR},
+      </if>
+      <if test="taobao_user_nick != null" >
+        #{taobao_user_nick,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <select id="countByExample" parameterType="com.maple.earnings.pojo.EUserExample" resultType="java.lang.Integer" >
+    select count(*) from e_user
+    <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+  </select>
+  <update id="updateByExampleSelective" parameterType="map" >
+    update e_user
+    <set >
+      <if test="record.taobao_user_id != null" >
+        taobao_user_id = #{record.taobao_user_id,jdbcType=VARCHAR},
+      </if>
+      <if test="record.taobao_user_nick != null" >
+        taobao_user_nick = #{record.taobao_user_nick,jdbcType=VARCHAR},
+      </if>
+    </set>
+    <if test="_parameter != null" >
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByExample" parameterType="map" >
+    update e_user
+    set taobao_user_id = #{record.taobao_user_id,jdbcType=VARCHAR},
+      taobao_user_nick = #{record.taobao_user_nick,jdbcType=VARCHAR}
+    <if test="_parameter != null" >
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByPrimaryKeySelective" parameterType="com.maple.earnings.pojo.EUser" >
+    update e_user
+    <set >
+      <if test="taobao_user_nick != null" >
+        taobao_user_nick = #{taobao_user_nick,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where taobao_user_id = #{taobao_user_id,jdbcType=VARCHAR}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.maple.earnings.pojo.EUser" >
+    update e_user
+    set taobao_user_nick = #{taobao_user_nick,jdbcType=VARCHAR}
+    where taobao_user_id = #{taobao_user_id,jdbcType=VARCHAR}
+  </update>
+</mapper>

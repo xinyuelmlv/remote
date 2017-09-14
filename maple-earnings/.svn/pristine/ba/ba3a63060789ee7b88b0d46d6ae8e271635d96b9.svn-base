@@ -1,0 +1,359 @@
+package com.maple.earnings.pojo;
+
+public class ProductInfoBean {
+	 private String category_id;
+	    private String city;
+	    private String cost_price;
+	    private String created;
+	    private String dealer_cost_price;
+	    private String desc_path;
+	    private String description;
+	    private int discount_id;
+	    private boolean have_guarantee;
+	    private boolean have_invoice;
+	    private String is_authz;
+	    private long item_id;
+	    private int items_count;
+	    private String modified;
+	    private String name;
+	    private int orders_count;
+	    private String outer_id;
+	    private String pictures;
+	    private long pid;
+	    private String postage_ems;
+	    private String postage_fast;
+	    private String postage_ordinary;
+	    private String postage_type;
+	    private int productcat_id;
+	    private String properties;
+	    private String property_alias;
+	    private String prov;
+	    private int quantity;
+	    private int quota_quantity;
+	    private int reserved_quantity;
+	    private String retail_price_high;
+	    private String retail_price_low;
+	    private int scitem_id;
+	    private SkusBean skus;
+	    private int spu_id;
+	    private String standard_price;
+	    private String standard_retail_price;
+	    private String status;
+	    private String trade_type;
+
+	    public String getCategory_id() {
+	        return category_id;
+	    }
+
+	    public void setCategory_id(String category_id) {
+	        this.category_id = category_id;
+	    }
+
+	    public String getCity() {
+	        return city;
+	    }
+
+	    public void setCity(String city) {
+	        this.city = city;
+	    }
+
+	    public String getCost_price() {
+	        return cost_price;
+	    }
+
+	    public void setCost_price(String cost_price) {
+	        this.cost_price = cost_price;
+	    }
+
+	    public String getCreated() {
+	        return created;
+	    }
+
+	    public void setCreated(String created) {
+	        this.created = created;
+	    }
+
+	    public String getDealer_cost_price() {
+	        return dealer_cost_price;
+	    }
+
+	    public void setDealer_cost_price(String dealer_cost_price) {
+	        this.dealer_cost_price = dealer_cost_price;
+	    }
+
+	    public String getDesc_path() {
+	        return desc_path;
+	    }
+
+	    public void setDesc_path(String desc_path) {
+	        this.desc_path = desc_path;
+	    }
+
+	    public String getDescription() {
+	        return description;
+	    }
+
+	    public void setDescription(String description) {
+	        this.description = description;
+	    }
+
+	    public int getDiscount_id() {
+	        return discount_id;
+	    }
+
+	    public void setDiscount_id(int discount_id) {
+	        this.discount_id = discount_id;
+	    }
+
+	    public boolean isHave_guarantee() {
+	        return have_guarantee;
+	    }
+
+	    public void setHave_guarantee(boolean have_guarantee) {
+	        this.have_guarantee = have_guarantee;
+	    }
+
+	    public boolean isHave_invoice() {
+	        return have_invoice;
+	    }
+
+	    public void setHave_invoice(boolean have_invoice) {
+	        this.have_invoice = have_invoice;
+	    }
+
+	    public String getIs_authz() {
+	        return is_authz;
+	    }
+
+	    public void setIs_authz(String is_authz) {
+	        this.is_authz = is_authz;
+	    }
+
+	    public long getItem_id() {
+	        return item_id;
+	    }
+
+	    public void setItem_id(long item_id) {
+	        this.item_id = item_id;
+	    }
+
+	    public int getItems_count() {
+	        return items_count;
+	    }
+
+	    public void setItems_count(int items_count) {
+	        this.items_count = items_count;
+	    }
+
+	    public String getModified() {
+	        return modified;
+	    }
+
+	    public void setModified(String modified) {
+	        this.modified = modified;
+	    }
+
+	    public String getName() {
+	        return name;
+	    }
+
+	    public void setName(String name) {
+	        this.name = name;
+	    }
+
+	    public int getOrders_count() {
+	        return orders_count;
+	    }
+
+	    public void setOrders_count(int orders_count) {
+	        this.orders_count = orders_count;
+	    }
+
+	    public String getOuter_id() {
+	        return outer_id;
+	    }
+
+	    public void setOuter_id(String outer_id) {
+	        this.outer_id = outer_id;
+	    }
+
+	    public String getPictures() {
+	        return pictures;
+	    }
+
+	    public void setPictures(String pictures) {
+	        this.pictures = pictures;
+	    }
+
+	    public long getPid() {
+	        return pid;
+	    }
+
+	    public void setPid(long pid) {
+	        this.pid = pid;
+	    }
+
+	    public String getPostage_ems() {
+	        return postage_ems;
+	    }
+
+	    public void setPostage_ems(String postage_ems) {
+	        this.postage_ems = postage_ems;
+	    }
+
+	    public String getPostage_fast() {
+	        return postage_fast;
+	    }
+
+	    public void setPostage_fast(String postage_fast) {
+	        this.postage_fast = postage_fast;
+	    }
+
+	    public String getPostage_ordinary() {
+	        return postage_ordinary;
+	    }
+
+	    public void setPostage_ordinary(String postage_ordinary) {
+	        this.postage_ordinary = postage_ordinary;
+	    }
+
+	    public String getPostage_type() {
+	        return postage_type;
+	    }
+
+	    public void setPostage_type(String postage_type) {
+	        this.postage_type = postage_type;
+	    }
+
+	    public int getProductcat_id() {
+	        return productcat_id;
+	    }
+
+	    public void setProductcat_id(int productcat_id) {
+	        this.productcat_id = productcat_id;
+	    }
+
+	    public String getProperties() {
+	        return properties;
+	    }
+
+	    public void setProperties(String properties) {
+	        this.properties = properties;
+	    }
+
+	    public String getProperty_alias() {
+	        return property_alias;
+	    }
+
+	    public void setProperty_alias(String property_alias) {
+	        this.property_alias = property_alias;
+	    }
+
+	    public String getProv() {
+	        return prov;
+	    }
+
+	    public void setProv(String prov) {
+	        this.prov = prov;
+	    }
+
+	    public int getQuantity() {
+	        return quantity;
+	    }
+
+	    public void setQuantity(int quantity) {
+	        this.quantity = quantity;
+	    }
+
+	    public int getQuota_quantity() {
+	        return quota_quantity;
+	    }
+
+	    public void setQuota_quantity(int quota_quantity) {
+	        this.quota_quantity = quota_quantity;
+	    }
+
+	    public int getReserved_quantity() {
+	        return reserved_quantity;
+	    }
+
+	    public void setReserved_quantity(int reserved_quantity) {
+	        this.reserved_quantity = reserved_quantity;
+	    }
+
+	    public String getRetail_price_high() {
+	        return retail_price_high;
+	    }
+
+	    public void setRetail_price_high(String retail_price_high) {
+	        this.retail_price_high = retail_price_high;
+	    }
+
+	    public String getRetail_price_low() {
+	        return retail_price_low;
+	    }
+
+	    public void setRetail_price_low(String retail_price_low) {
+	        this.retail_price_low = retail_price_low;
+	    }
+
+	    public int getScitem_id() {
+	        return scitem_id;
+	    }
+
+	    public void setScitem_id(int scitem_id) {
+	        this.scitem_id = scitem_id;
+	    }
+
+	    public SkusBean getSkus() {
+	        return skus;
+	    }
+
+	    public void setSkus(SkusBean skus) {
+	        this.skus = skus;
+	    }
+
+	    public int getSpu_id() {
+	        return spu_id;
+	    }
+
+	    public void setSpu_id(int spu_id) {
+	        this.spu_id = spu_id;
+	    }
+
+	    public String getStandard_price() {
+	        return standard_price;
+	    }
+
+	    public void setStandard_price(String standard_price) {
+	        this.standard_price = standard_price;
+	    }
+
+	    public String getStandard_retail_price() {
+	        return standard_retail_price;
+	    }
+
+	    public void setStandard_retail_price(String standard_retail_price) {
+	        this.standard_retail_price = standard_retail_price;
+	    }
+
+	    public String getStatus() {
+	        return status;
+	    }
+
+	    public void setStatus(String status) {
+	        this.status = status;
+	    }
+
+	    public String getTrade_type() {
+	        return trade_type;
+	    }
+
+	    public void setTrade_type(String trade_type) {
+	        this.trade_type = trade_type;
+	    }
+
+	    public static class SkusBean {
+	    }
+
+}

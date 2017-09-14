@@ -1,0 +1,408 @@
+/**
+d * MAPLE CONFIDENTIAL - Highly Restricted: Do not distribute without prior approval
+ *
+ * Project: MAPLE
+ *
+ * Copyright © 2017 MAPLE Corporation. All rights reserved.
+ */
+package com.maple.earnings.service.impl;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+import org.apache.poi.hssf.usermodel.HSSFCell;
+import org.apache.poi.hssf.usermodel.HSSFCellStyle;
+import org.apache.poi.hssf.usermodel.HSSFRow;
+import org.apache.poi.hssf.usermodel.HSSFSheet;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
+import com.maple.earnings.common.GlobalMap;
+import com.maple.earnings.common.pojo.EasyUIDataGridResult;
+import com.maple.earnings.mapper.ETradeMapper;
+import com.maple.earnings.mapper.OrderReportMapper;
+import com.maple.earnings.pojo.DayReport;
+import com.maple.earnings.pojo.DifferenceReportDTO;
+import com.maple.earnings.pojo.EOrder;
+import com.maple.earnings.pojo.ETrade;
+import com.maple.earnings.pojo.ETradeExample;
+import com.maple.earnings.pojo.OrderReport;
+import com.maple.earnings.pojo.OrderReportDTO;
+import com.maple.earnings.pojo.OrderReportExample;
+import com.maple.earnings.pojo.OrderReportExample.Criteria;
+import com.maple.earnings.service.OrderReportService;
+import com.maple.earnings.service.OrderService;
+import com.maple.earnings.service.ProductCostService;
+import com.maple.earnings.service.TradeService;
+
+/**
+ * TODO - High level description about type's responsibility.
+ *
+ * @author Yayun
+ */
+@Service
+public class OrderReportServiceImpl implements OrderReportService {
+
+	@Autowired
+	private OrderReportMapper orderReportMapper;
+	@Autowired
+	private ETradeMapper tradeMapper;
+	@Autowired
+	private OrderService orderService;
+
+	@Autowired
+	private ProductCostService productCostService;
+
+	@Autowired
+	private TradeService tradeService;
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * TODO - Add javadoc for the sub-type.
+	 */
+	@Override
+	public void saveOrUpdate(OrderReport orderReport) {
+		if (this.load(orderReport.getTid()) == null) {
+			this.orderReportMapper.insert(orderReport);
+		} else {
+			this.orderReportMapper.updateByPrimaryKey(orderReport);
+		}
+	}
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * TODO - Add javadoc for the sub-type.
+	 */
+	@Override
+	public EasyUIDataGridResult list(String userId, String startTime, String endTime, String orderStatus, int page,
+			int rows) {
+		PageHelper.startPage(page, rows);
+		List<OrderReport> reports = new ArrayList<>();
+		OrderReportExample example = new OrderReportExample();
+		Criteria criteria = example.createCriteria();
+		criteria.andUserIdEqualTo(userId);
+		if (startTime != null && !startTime.equals("") && endTime != null && !endTime.equals("")) {
+			criteria.andReportDateBetween(startTime, endTime);
+		}
+		// 获取未完成订单 订单状态为WAIT_SELLER_SEND_GOODS、WAIT_BUYER_CONFIRM_GOODS
+		if ("unfinished".equals(orderStatus)) {
+			criteria.andStatusIn(Arrays.asList(GlobalMap.ORDER_STATUS.get("WAIT_SELLER_SEND_GOODS"),
+					GlobalMap.ORDER_STATUS.get("WAIT_BUYER_CONFIRM_GOODS")));
+		} else if (!"unfinished".equals(orderStatus) && !"all".equals(orderStatus)) {
+			criteria.andStatusEqualTo(GlobalMap.ORDER_STATUS.get(orderStatus));
+		}
+		reports = this.orderReportMapper.selectByExample(example);
+		EasyUIDataGridResult results = new EasyUIDataGridResult();
+		PageInfo<OrderReport> pageInfo = new PageInfo<>(reports);
+		results.setRows(reports);
+		results.setTotal(pageInfo.getTotal());
+		return results;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * TODO - Add javadoc for the sub-type.
+	 */
+	@Override
+	public OrderReport load(long tid) {
+		return this.orderReportMapper.selectByPrimaryKey(tid);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * TODO - Add javadoc for the sub-type.
+	 */
+	@Override
+	public List<String> getReportDates(String userId) {
+		List<String> reportDates = new ArrayList<>();
+		reportDates = this.orderReportMapper.selectReportDates(userId);
+		return reportDates;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * TODO - Add javadoc for the sub-type.
+	 */
+	@Override
+	public EasyUIDataGridResult listByReportDate(String userId, String reportDate, int page, int rows) {
+		PageHelper.startPage(page, rows);
+		List<OrderReport> reports = new ArrayList<>();
+		OrderReportExample example = new OrderReportExample();
+		Criteria criteria = example.createCriteria();
+		criteria.andUserIdEqualTo(userId);
+		criteria.andUserIdEqualTo(userId);
+		criteria.andReportDateEqualTo(reportDate);
+		reports = this.orderReportMapper.selectByExample(example);
+		EasyUIDataGridResult results = new EasyUIDataGridResult();
+		PageInfo<OrderReport> pageInfo = new PageInfo<>(reports);
+		results.setRows(reports);
+		results.setTotal(pageInfo.getTotal());
+		return results;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * TODO - Add javadoc for the sub-type.
+	 */
+	@Override
+	public List<DayReport> list(String userId) {
+		List<DayReport> dayReports = this.orderReportMapper.selectDayReportDates(userId);
+		return dayReports;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * TODO - Add javadoc for the sub-type.
+	 */
+	@Override
+	public List<OrderReportDTO> listOrderReportDTOByTid(long tid) {
+		ETrade trade = this.tradeService.load(tid);
+		List<OrderReportDTO> orderReportDTOs = new ArrayList<>();
+		OrderReportDTO orderReportDTO = null;
+		List<EOrder> orders = this.orderService.listOrderAndRefund(tid);
+		for (EOrder order : orders) {
+			orderReportDTO = new OrderReportDTO();
+			orderReportDTO.setCreated(trade.getCreated());
+			orderReportDTO.setPayTime(trade.getPayTime());
+			orderReportDTO.setEndTime(trade.getEndTime());
+			orderReportDTO.setModifiedTime(trade.getModifiedTime());
+			orderReportDTO.setNum(order.getNum());
+			orderReportDTO.setCost(order.getCost());
+			orderReportDTO.setId(order.getId());
+			orderReportDTO.setPrice(order.getPrice());
+			orderReportDTO.setNumIid(order.getNumIid());
+			orderReportDTO.setRefundStatus(GlobalMap.REFUND_STATUS.get(order.getRefundStatus()));
+			orderReportDTO.setStatus(GlobalMap.ORDER_STATUS.get(trade.getStatus()));
+			orderReportDTO.setTid(tid);
+			orderReportDTO.setTitle(order.getTitle());
+			orderReportDTO.seteRefund(order.geteRefund());
+		//	orderReportDTO.setProductCost(this.productCostService.list(order.getNumIid()).get(0).getCost());
+			orderReportDTOs.add(orderReportDTO);
+		}
+		return orderReportDTOs;
+	}
+
+	/**
+	 * 获取差异报表
+	 *
+	 * TODO - Add javadoc for the sub-type.
+	 */
+	@Override
+	public EasyUIDataGridResult listDiffrenceReport(String userId, String startTime, String endTime, String orderStatus,
+			int page, int rows) {
+		PageHelper.startPage(page, rows);
+		List<OrderReport> reports = null;
+		List<DifferenceReportDTO> reportDTOs = new ArrayList<>();
+		DifferenceReportDTO orderReportDTO = null;
+		OrderReportExample example = new OrderReportExample();
+		Criteria criteria = example.createCriteria();
+		criteria.andUserIdEqualTo(userId);
+		if (startTime != null && !startTime.equals("") && endTime != null && !endTime.equals("")) {
+			criteria.andReportDateBetween(startTime, endTime);
+		}
+		if ("unfinished".equals(orderStatus)) {
+			criteria.andStatusIn(Arrays.asList(GlobalMap.ORDER_STATUS.get("WAIT_SELLER_SEND_GOODS"),
+					GlobalMap.ORDER_STATUS.get("WAIT_BUYER_CONFIRM_GOODS")));
+		} else if (!"unfinished".equals(orderStatus) && !"all".equals(orderStatus)) {
+			criteria.andStatusEqualTo(GlobalMap.ORDER_STATUS.get(orderStatus));
+		}
+		reports = this.orderReportMapper.selectByExample(example);
+		// 将报表封装为DifferenceReportDTO
+		for (OrderReport orderReport : reports) {
+			orderReportDTO = new DifferenceReportDTO();
+			orderReportDTO.setTid(orderReport.getTid());
+			orderReportDTO.setUserId(orderReport.getUserId());
+			orderReportDTO.setRefundFee(orderReport.getRefundFee());
+			orderReportDTO.setTotalFee(orderReport.getTotalFee());
+			orderReportDTO.setStatus(orderReport.getStatus());
+			// 订单状态为已完成才有实际到账和佣金
+			if (orderReport.getStatus().equals(GlobalMap.ORDER_STATUS.get("TRADE_FINISHED"))) {
+				orderReportDTO.setRealReceive(orderReport.getRealReceive());
+				orderReportDTO.setCommission(orderReport.getCommission());
+			} else {
+				orderReportDTO.setRealReceive(0.0);
+				orderReportDTO.setCommission(0.0);
+			}
+			// 订单状态为未发货 商品成本为0
+			if (orderReport.getStatus().equals(GlobalMap.ORDER_STATUS.get("WAIT_SELLER_SEND_GOODS"))) {
+				orderReportDTO.setProductCost(0.0);
+			} else {
+				orderReportDTO.setProductCost(orderReport.getProductCost());
+			}
+			orderReportDTO.setRealExpenditure(orderReportDTO.getCommission() + orderReportDTO.getProductCost());
+			orderReportDTO.setReportDate(orderReport.getReportDate());
+			reportDTOs.add(orderReportDTO);
+		}
+		EasyUIDataGridResult results = new EasyUIDataGridResult();
+		PageInfo<OrderReport> pageInfo = new PageInfo<>(reports);
+		results.setRows(reportDTOs);
+		results.setTotal(pageInfo.getTotal());
+		return results;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * TODO - Add javadoc for the sub-type.
+	 */
+	@Override
+	public List<DifferenceReportDTO> findDiffrenceReport(String userId, String startTime, String endTime,
+			String orderStatus) {
+		List<OrderReport> reports = null;
+		List<DifferenceReportDTO> reportDTOs = new ArrayList<>();
+		DifferenceReportDTO orderReportDTO = null;
+		OrderReportExample example = new OrderReportExample();
+		Criteria criteria = example.createCriteria();
+		criteria.andUserIdEqualTo(userId);
+		if (startTime != null && !startTime.equals("") && endTime != null && !endTime.equals("")) {
+			criteria.andReportDateBetween(startTime, endTime);
+		}
+		if ("unfinished".equals(orderStatus)) {
+			criteria.andStatusIn(Arrays.asList(GlobalMap.ORDER_STATUS.get("WAIT_SELLER_SEND_GOODS"),
+					GlobalMap.ORDER_STATUS.get("WAIT_BUYER_CONFIRM_GOODS")));
+		} else if (!"unfinished".equals(orderStatus) && !"all".equals(orderStatus)) {
+			criteria.andStatusEqualTo(GlobalMap.ORDER_STATUS.get(orderStatus));
+		}
+		reports = this.orderReportMapper.selectByExample(example);
+		// 将报表封装为DifferenceReportDTO
+		for (OrderReport orderReport : reports) {
+			orderReportDTO = new DifferenceReportDTO();
+			orderReportDTO.setTid(orderReport.getTid());
+			orderReportDTO.setUserId(orderReport.getUserId());
+			orderReportDTO.setRefundFee(orderReport.getRefundFee());
+			orderReportDTO.setTotalFee(orderReport.getTotalFee());
+			orderReportDTO.setStatus(orderReport.getStatus());
+			// 订单状态为已完成才有实际到账和佣金
+			if (orderReport.getStatus().equals(GlobalMap.ORDER_STATUS.get("TRADE_FINISHED"))) {
+				orderReportDTO.setRealReceive(orderReport.getRealReceive());
+				orderReportDTO.setCommission(orderReport.getCommission());
+			} else {
+				orderReportDTO.setRealReceive(0.0);
+				orderReportDTO.setCommission(0.0);
+			}
+			// 订单状态为未发货 商品成本为0
+			if (orderReport.getStatus().equals(GlobalMap.ORDER_STATUS.get("WAIT_SELLER_SEND_GOODS"))) {
+				orderReportDTO.setProductCost(0.0);
+			} else {
+				orderReportDTO.setProductCost(orderReport.getProductCost());
+			}
+			orderReportDTO.setRealExpenditure(orderReportDTO.getCommission() + orderReportDTO.getProductCost());
+			orderReportDTO.setReportDate(orderReport.getReportDate());
+			reportDTOs.add(orderReportDTO);
+		}
+		return reportDTOs;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * TODO - Add javadoc for the sub-type.
+	 *
+	 * @throws IOException
+	 */
+	@Override
+	public byte[] exportDiffrenceReportDTO(List<DifferenceReportDTO> list) throws IOException {
+		ByteArrayOutputStream out = new ByteArrayOutputStream();
+		// 第一步，创建一个webbook，对应一个Excel文件
+		HSSFWorkbook wb = new HSSFWorkbook();
+		// 第二步，在webbook中添加一个sheet,对应Excel文件中的sheet
+		HSSFSheet sheet = wb.createSheet("差异报表");
+		// 第三步，在sheet中添加表头第0行,注意老版本poi对Excel的行数列数有限制short
+		HSSFRow row = sheet.createRow(0);
+		// 第四步，创建单元格，并设置值表头 设置表头居中
+		HSSFCellStyle style = wb.createCellStyle();
+		style.setAlignment(HSSFCellStyle.ALIGN_CENTER); // 创建一个居中格式
+
+		// 设置表头
+		List<String> excelHead = this.getExcelHead();
+
+		HSSFCell cell = null;
+		// excel头
+		for (int i = 0; i < excelHead.size(); i++) {
+			cell = row.createCell(i);
+			cell.setCellValue(excelHead.get(i));
+			cell.setCellStyle(style);
+		}
+
+		// 第五步，写入实体数据 实际应用中这些数据从数据库得到
+		// List<BrandPeriodSortEntity> list =
+		// getBrandPeriodSortDynamicOrder(entity, orderType);
+
+		DifferenceReportDTO differenceReportDTO = null; // 拼装excel内容
+		for (int i = 0; i < list.size(); i++) {
+			row = sheet.createRow(i + 1);
+			differenceReportDTO = list.get(i);
+			// 创建单元格，并设置值
+
+			int j = 0;
+			this.insertCell(row, j++, differenceReportDTO.getTid());
+			this.insertCell(row, j++, differenceReportDTO.getReportDate());
+			this.insertCell(row, j++, differenceReportDTO.getStatus());
+			this.insertCell(row, j++, differenceReportDTO.getTotalFee());
+			this.insertCell(row, j++, differenceReportDTO.getProductCost());
+			this.insertCell(row, j++, differenceReportDTO.getCommission());
+			this.insertCell(row, j++, differenceReportDTO.getRealReceive());
+			this.insertCell(row, j++, differenceReportDTO.getRealExpenditure());
+			this.insertCell(row, j++, differenceReportDTO.getRefundFee());
+
+		}
+		wb.write(out);
+		return out.toByteArray();
+	}
+
+	/**
+	 * 获取excel表头
+	 *
+	 * @return
+	 */
+	private List<String> getExcelHead() {
+		List<String> result = new ArrayList<String>(17);
+		result.add("交易编号");
+		result.add("交易日期");
+		result.add("状态");
+		result.add("付款金额");
+		result.add("商品成本");
+		result.add("佣金");
+		result.add("实际到账");
+		result.add("实际支出");
+		result.add("退款金额");
+
+		return result;
+	}
+
+	private void insertCell(HSSFRow row, int i, Object object) {
+
+		if (object == null) {
+			row.createCell(i).setCellValue("");
+		} else {
+			row.createCell(i).setCellValue(object.toString());
+		}
+
+	}
+
+	public List<Integer> tradeSum(String userId, String startTime, String endTime) {
+		List<Integer> lTradeSum = new ArrayList<Integer>();
+		ETradeExample example = new ETradeExample();
+		com.maple.earnings.pojo.ETradeExample.Criteria criteria = example.createCriteria();
+		if (startTime != null && !startTime.equals("") && endTime != null && !endTime.equals("")) {
+			criteria.andCreatedBetween(startTime, endTime);
+		}
+		lTradeSum = tradeMapper.getTradeSum(example);
+
+		return lTradeSum;
+	}
+
+}

@@ -1,0 +1,198 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+	pageEncoding="UTF-8"%>
+<%@ include file="/commons/global.jsp"%>
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="X-UA-Compatible" content="edge" />
+<title>订单管理</title>
+<style type="text/css">
+#fm {
+	margin: 0;
+	padding: 10px 30px;
+}
+
+.ftitle {
+	font-size: 14px;
+	font-weight: bold;
+	padding: 5px 0;
+	margin-bottom: 10px;
+	border-bottom: 1px solid #ccc;
+}
+
+.fitem {
+	margin-bottom: 5px;
+}
+
+.fitem label {
+	display: inline-block;
+	width: 80px;
+}
+</style>
+
+<script type="text/javascript">
+        var url;
+        var type;
+        var Vtid;
+        function vieworder() {
+            var row = $("#dataGrid").datagrid("getSelected");
+            Vtid = row.tid;
+            if (row) {
+                var queryParams = $('#orderGrid').datagrid('options').queryParams;  
+                queryParams.tid = Vtid;  
+                $('#orderGrid').datagrid('options').queryParams=queryParams;        
+                $("#orderGrid").datagrid('reload'); 
+                
+                $("#dlg").dialog("open").dialog('setTitle', '订单详情');
+            }
+            else{
+            	 $.messager.alert("提示信息", "请先选中要操作的行！");
+            }
+        }
+    </script>
+    <script type="text/javascript">
+        var url1;
+        function editorderCost() {
+            var row = $("#orderGrid").datagrid("getSelected");
+            if (row) {
+                $("#dlgorder").dialog("open").dialog('setTitle', '');
+                $('#OrderCode').val(row.id);
+                $('#orderName').val(row.title);
+                $('#orderPrice').val(row.price);
+                $('#orderCost').val(row.cost);
+                $('#orderID').val(row.tid);
+                url1 ='${path}' + '/trade/update';
+            }
+            else{
+            	 $.messager.alert("提示信息", "请先选中要操作的行！");
+            }
+        }
+        function saveorder() {
+          var OrderCode=$('#OrderCode').val();
+          var orderCost=$('#orderCost').val();
+          var orderID=$('#orderID').val();
+         
+            $("#fm").form("submit", {
+                url: url1+'?id='+OrderCode+'&cost='+orderCost+'&tid='+orderID,
+                onsubmit: function () {
+                    return $(this).form("validate");
+                },
+                success: function (result) {
+                    if (result == "1") {
+                        $.messager.alert("提示信息", "操作成功");
+                        $("#dlgorder").dialog("close");
+                        $("#orderGrid").datagrid("load");
+                    }
+                    else {
+                        $.messager.alert("提示信息", "操作失败");
+                    }
+                }
+            });
+        } 
+    </script>
+</head>
+<body class="easyui-layout" data-options="fit:true,border:false">
+
+	<div data-options="region:'center',fit:true,border:false">
+		<div id="toolbar">
+			<a href="javascript:void(0)" class="easyui-linkbutton"
+				iconcls="icon-search" onclick="vieworder()" plain="true">查看订单详情</a>
+		</div>
+		<table class="easyui-datagrid" id="dataGrid"
+			data-options="singleSelect:true,
+       collapsible:true,
+       pagination:true,
+       url:'${path}/trade/list',
+       rownumbers : true,
+       method:'get',
+       pageSize:20,
+        queryParams: {userId: '2054555330'},
+      ">
+			<thead>
+				<tr>
+					<th data-options="field:'tid'">交易ID</th>
+					<th data-options="field:'created',width:200">创建日期</th>
+					<th data-options="field:'payTime',width:200">付款日期</th>
+					<th data-options="field:'modifiedTime',width:200">修改时间</th>
+					<th data-options="field:'endTime',width:200">结束日期</th>
+					<th data-options="field:'status',width:100">状态</th>
+					<th data-options="field:'totalFee',width:70,align:'right'">价格</th>
+					<th data-options="field:'userId',width:70,align:'right'">用户标识</th>
+				</tr>
+			</thead>
+		</table>
+	</div>
+	<div id="dlg" class="easyui-dialog"
+		style="width: 700px; height: 450px; padding: 10px 20px;" closed="true"
+		buttons="#dlg-buttons">
+		<div class="ftitle">配置订单费用</div>
+		<div data-options="region:'center',fit:true,border:false">
+			<div id="toolbar">
+				<a href="javascript:void(0)" class="easyui-linkbutton"
+					iconcls="icon-edit" onclick="editorderCost()" plain="true">配置订单费用</a>
+			</div>
+			<table class="easyui-datagrid" id="orderGrid"
+				data-options="singleSelect:true,
+       collapsible:true,
+       pagination:true,
+       url:'${path}/trade/order',
+       rownumbers : true,
+       method:'get',
+       pageSize:20,
+       queryParams: 
+       {
+      tid:'99999999998'
+       },
+       ">
+				<thead>
+					<tr>
+						<th data-options="field:'id',width:100,editor:'text'">订单编号</th>
+						<th data-options="field:'title',width:100,editor:'text'">订单名称</th>
+						<th data-options="field:'price',width:100,editor:'text'">订单价格</th>
+						<th data-options="field:'cost',width:100,editor:'text'">订单成本</th>
+						<th data-options="field:'status',width:100,editor:'text'">订单状态</th>
+						<th data-options="field:'tid',width:100,editor:'text'">订单标识</th>
+
+
+					</tr>
+				</thead>
+			</table>
+			<div id="dlgorder" class="easyui-dialog"
+				style="width: 400px; height: 280px; padding: 10px 20px;"
+				closed="true" buttons="#dlg-buttons">
+				<div class="ftitle">配置订单成本</div>
+				<form id="fm" method="post">
+					<div class="fitem">
+						<label> 订单编号 </label> <input name="OrderCode" id="OrderCode"
+							class="easyui-validatebox" required="true" readonly="readonly" />
+					</div>
+					<div class="fitem">
+						<label> 订单名称 </label> 
+						<input name="orderName" id="orderName" class="easyui-validatebox" required="true" readonly="readonly"  />
+					</div>
+					<div class="fitem">
+						<label> 订单价格 </label> <input name="orderPrice" id="orderPrice" class="easyui-validatebox" required="true" readonly="readonly" />
+					</div>
+					<div class="fitem">
+						<label> 订单成本</label> <input name="orderCost" id="orderCost"
+							class="easyui-validatebox" required="true" />
+					</div>
+					<div class="fitem">
+						<label>订单标识</label> <input name="orderID" id="orderID"
+							class="easyui-validatebox" required="true" readonly="readonly" />
+					</div>
+				</form>
+			</div>
+
+			<div id="dlg-buttons">
+				<a href="javascript:void(0)" class="easyui-linkbutton"
+					onclick="saveorder()" iconcls="icon-save">保存</a> <a
+					href="javascript:void(0)" class="easyui-linkbutton"
+					onclick="javascript:$('#dlgorder').dialog('close')"
+					iconcls="icon-cancel">取消</a>
+			</div>
+		</div>
+	</div>
+	<div id="toolbar" style="display: none;"></div>
+</body>
+</html>
